@@ -20,7 +20,7 @@ int main()
   bool done;
   done = false;
 
-  Ball testBall = Ball(0.0,0.0,0.0);
+  Ball testBall = Ball(0.0,0.0,0.0,1.5);
 
   while (!done)
   {
@@ -36,9 +36,12 @@ int main()
     cout << "Current time from start (in seconds): ";
     getline(cin, time);
     cin.sync(); 
-   
-    testBall.accel(stod(xAccel), stod(yAccel), stod(zAccel), stod(time));
-    testBall.displayStatus();
+  
+    testBall.SetXAccel(stod(xAccel));
+    testBall.SetYAccel(stod(yAccel));
+    testBall.SetZAccel(stod(zAccel));
+    testBall.BallState(stod(time));
+    testBall.DisplayStatus();
 
     cout << "Are you done (y/n)? ";
     getline(cin, yesOrNo);
