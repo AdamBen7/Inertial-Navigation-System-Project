@@ -5,11 +5,19 @@ class Ball{
   public:
     Ball();
     ~Ball();
+    void SetPos(const float velX, velY, velZ);
+    void SetVel(const float accelX, accelY, accelZ);
 
+
+//Do i need this? Can just put in constructor
+    void SetAccelX(const float inForceX);
+
+
+/*
     void SetPosX(const float inPosX);
     void SetPosY(const float inPosY);
     void SetPosZ(const float inPosZ);
-
+*/
     void SetForceX(const float inForceX);
     void SetForceY(const float inForceY);
     void SetForceZ(const float inForceZ);
@@ -21,10 +29,20 @@ class Ball{
     float posX;
     float posY;
     float posZ;
-//experienced force
+
+    float velX;
+    float velY;
+    float velZ;
+    
+    float accelX;
+    float accelY;
+    float accelZ;
+
+//experienced force. Unnecessary?
     float forceX;
     float forceY;
     float forceZ;
 
+    int time; //millis function sets this?
 };
 
