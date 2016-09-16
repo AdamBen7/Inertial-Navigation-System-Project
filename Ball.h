@@ -1,48 +1,25 @@
-
-
-class Ball{
-
-  public:
-    Ball();
-    ~Ball();
-    void SetPos(const float velX, velY, velZ);
-    void SetVel(const float accelX, accelY, accelZ);
-
-
-//Do i need this? Can just put in constructor
-    void SetAccelX(const float inForceX);
-
-
-/*
-    void SetPosX(const float inPosX);
-    void SetPosY(const float inPosY);
-    void SetPosZ(const float inPosZ);
+/* 
+   Header for Ball class, accelerates linearly in 3 dimensions
+   Part of "messing around"
 */
-    void SetForceX(const float inForceX);
-    void SetForceY(const float inForceY);
-    void SetForceZ(const float inForceZ);
 
-  private:
-    const float ballMass;
+#ifndef Ball_h
+#define Ball_h
 
-// position with respect to origin
-    float posX;
-    float posY;
-    float posZ;
-
-    float velX;
-    float velY;
-    float velZ;
+class Ball
+{
+  public:
+    Ball(double xPos, double yPos, double zPos);
+    void accel(double xAccel, double yAccel, double zAccel, double time);
+    void displayStatus(); 
     
-    float accelX;
-    float accelY;
-    float accelZ;
-
-//experienced force. Unnecessary?
-    float forceX;
-    float forceY;
-    float forceZ;
-
-    int time; //millis function sets this?
+  private:
+    double _xPos;
+    double _yPos;
+    double _zPos;
+    double _xVel;
+    double _yVel;
+    double _zVel;
+    double _lastTime;
 };
-
+#endif

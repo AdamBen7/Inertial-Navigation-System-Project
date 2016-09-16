@@ -1,76 +1,38 @@
-//initialize the values.
-//These will be replaced by data from IMU
-
-Ball::Ball: 
-    ballMass(1.0),
-    posX(inPosX),
-    posY(inPosY),
-    posZ(inPosZ){
-}
-
-float inAccelX;
-float inAccelY; 
-float inAccelZ ;
-
-float inPosX = 0;
-float inPosY = 0;
-float inPosZ = 0;
-
-float ballMass; //kg
-
-
-void Ball::SetAccelX(const float inAccelX){
-  accelX = inAccelX;
-}
-
-void Ball::SetAccelY(const float inAccelY){
-  accelY = inAccelY;
-}
- 
-void Ball::SetAccelZ(const float inAccelZ){
-  accelX = inAccelZ;
-}
-
-void Ball::SetVel(const float inAccelX, inAccelY, inAccelZ){
-  velX += .5*accelX; //time?
-  velY += .5*accelY;
-  velZ += .5*accelZ;
-}
-
-void Ball::SetPos(const float velX, velY, velZ){
-  posX += velX; //time?
-  posY += velY;
-  posZ += velZ;
-}
-
-float sumForceX = inAccelX*ballMass;
-float sumForceY = inAccelY*ballMass;
-float sumForceZ = inAccelZ*ballMass;
-
 /*
-void Ball::SetPosX(const float inPosX){
-  posX = inPosX;
-}
-
-void Ball::SetPosY(const float inPosY){
-  posY = inPosY;
-}
-
-void Ball::SetPosZ(const float inPosZ){
-  posZ = inPosZ;
-}
+   Methods for Ball class, accelerates linearly in 3 dimensions
+   For "messing around"
 */
 
-void Ball::SetForceX(const float sumForceX){
-  forceX = sumForceX;
+#include <iostream>
+#include "Ball.h"
+
+using namespace std;
+
+Ball::Ball(double xPos, double yPos, double zPos)
+{
+  _xPos = xPos;
+  _yPos = yPos;
+  _zPos = zPos;
+  _xVel = 0.0;
+  _yVel = 0.0;
+  _zVel = 0.0;
+  _lastTime = 0.0;
 }
 
-void Ball::SetForceY(const float sumForceY){
-  forceY = sumForceY;
+void Ball::accel(double xAccel, double yAccel, double zAccel, double time)
+{
+  double elapsedTime = time - _lastTime;
+  _xPos += (_xVel * elapsedTime) + (xAccel * elapsedTime * elapsedTime / 2.0); 
+  _yPos += (_yVel * elapsedTime) + (yAccel * elapsedTime * elapsedTime / 2.0); 
+  _zPos += (_zVel * elapsedTime) + (zAccel * elapsedTime * elapsedTime / 2.0); 
+  _xVel += (xAccel * elapsedTime);
+  _yVel += (yAccel * elapsedTime);
+  _zVel += (zAccel * elapsedTime);
+  _lastTime = time;
 }
 
-void Ball::SetForceZ(const float sumForceZ){
-  forceZ = sumForceZ;
+void Ball::displayStatus()
+{
+  cout << "Position (x,y,z): (" << _xPos << "," << _yPos << "," << _zPos << ")" << endl;  
+  cout << "Velocity <x,y,z>: <" << _xVel << "," << _yVel << "," << _zVel << ">" << endl;
 }
-
-
