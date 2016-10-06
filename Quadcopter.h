@@ -46,29 +46,31 @@ class Quadcopter
 // quadcopter state. might not need it
     bool on-off;
 
-// position of quadcopter
-    double _xPos;
-    double _yPos;
-    double _zPos;
-    
-    double _xVel;
-    double _yVel;
-    double _zVel;
-
-//Accelerometer feeds us this data
+// Angular-Velocity |Body  |raw
+    double _pAngV;
+    double _qAngV;
+    double _rAngV;
+// Linear Accel     |Body  |raw
     double _xAccel;
     double _yAccel;
     double _zAccel;
 
-// orientation of quadcopter
-    double _uOrr;
-    double _vOrr;
-    double _wOrr;
-
-// Gyroscope feeds us this data
+// Position         |Global|from linear vel
+    double _xPos;
+    double _yPos;
+    double _zPos;
+    
+// Linear velocity  |Body  |from accel
     double _uVel;
     double _vVel;
     double _wVel;
+
+// Quaternion Orient|Global|from angular velocity  
+    double _q0;
+    double _q1;
+    double _q2;
+    double _q3;
+
 
     double _Time;
     

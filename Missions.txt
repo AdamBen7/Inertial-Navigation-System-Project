@@ -1,13 +1,10 @@
 Missions for us:
--Create a mathematical model of a ball Adam could kick
--Keep Learning more about quanternions
+Code Quadcopter Flight Numerical Model
 
 
-ADAM's TODO:
 
-
-NATHAN's TODO:
-
-
+DONE: -Create a mathematical model of a ball Adam could kick
+DONE: -Keep Learning more about quanternions
+DONE: -Code CANbus communication testing 
 
 
