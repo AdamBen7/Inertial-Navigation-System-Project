@@ -6,13 +6,14 @@
 using namespace std;
 //Position Update Matrix 
 
-int main(){
+void LinearUpdater(Quadcopter & MyQuad){
   //  Quadcopter Quad;
 
   double mass = 10.0;
   double grav = 9.81;
   double weight = mass * grav;
-
+  double dtime = 1.0;
+/*
   double EulerVec[3];
   double eulerX = 0; 
   double eulerY = 0;
@@ -26,23 +27,33 @@ int main(){
   double q1 = QuatVec[1];
   double q2 = QuatVec[2];
   double q3 = QuatVec[3];
+*/
+
+  double q0 = MyQuad.Getq0();
+  double q1 = MyQuad.Getq1();
+  double q2 = MyQuad.Getq2();
+  double q3 = MyQuad.Getq3();
+
+  double xPos = MyQuad.GetXPos();
+  double yPos = MyQuad.GetYPos();
+  double zPos = MyQuad.GetZPos();
 
   //bodyframe linear vel
-  double u = 0;
-  double v = 0;
-  double w = 0;
+  double u = MyQuad.GetUVel();
+  double v = MyQuad.GetVVel();
+  double w = MyQuad.GetWVel();
 
   double LVelVec[3] = {u, v, w};
 
   //Angular Velocity, Body Frame
-  double p = 0;
-  double q = 0;
-  double r = 0;
+  double p = MyQuad.GetPAngVel();
+  double q = MyQuad.GetQAngVel();
+  double r = MyQuad.GetRAngVel();
 
   //LinearForces Experienced
-  double X = 0;
-  double Y = 0;
-  double Z = 0;
+  double X = 0.0;
+  double Y = 0.0;
+  double Z = 0.0;
 
   double BMat[][3] =
   {{q0*q0+q1*q1-q2*q2-q3*q3, 2*(q1*q2-q0*q3),         2*(q1*q3+q0*q2)},
@@ -58,17 +69,24 @@ int main(){
 
   //equations of motion
 
+/*
   double du = r*v -q*w + (X/mass) - grav*sin(eulerX);
   double dv = -r*u+p*q + (Y/mass) - grav*cos(eulerX)*sin(eulerY);
   double dw = q*u-p*v  + (Z/mass) - grav*cos(eulerX)*cos(eulerY);
 
   //acceleration in body frame
   double dVelVector[3] = {du, dv, dw};
+*/
 
-  print(dPosVector,3);
+  // Update Quadcopter Object
+  MyQuad.SetXPos(xPos + dPosVector[0]*dtime);
+  MyQuad.SetYPos(yPos + dPosVector[1]*dtime);
+  MyQuad.SetZPos(zPos + dPosVector[2]*dtime);
 
-  delete[] QuatVec;
-  return 0;
+
+//  print(dPosVector,3);
+
+//  delete[] QuatVec;
 }
 //    return  posMat;
 /*
