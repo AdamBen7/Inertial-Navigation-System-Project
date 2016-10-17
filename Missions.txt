@@ -1,6 +1,9 @@
 Missions for us:
 Code Quadcopter Flight Numerical Model
 
+Create A Makefile
+Compiles Quadcopter.cpp with updateposition, updaterotation functions (matrixlib will be includes)
+
 
 
 DONE: -Create a mathematical model of a ball Adam could kick

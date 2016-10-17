@@ -12,18 +12,19 @@ class Quadcopter
     double GetYPos() {return _yPos;}
     double GetZPos() {return _zPos;}
 
-    double GetXVel() {return _xVel;}
-    double GetYVel() {return _yVel;}
-    double GetZVel() {return _zVel;}
+    double GetPAngVel() {return _pAngV;}
+    double GetQAngVel() {return _qAngV;}
+    double GetRAngVel() {return _rAngV;}
 
     double GetXAccel() {return _xAccel;}
     double GetYAccel() {return _yAccel;}
     double GetZAccel() {return _zAccel;}
 
+/*
     double GetUOrr() {return _uOrr;}
     double GetVOrr() {return _vOrr;}
     double GetWOrr() {return _wOrr;}
-
+*/
     double GetUVel() {return _uVel;}
     double GetVVel() {return _vVel;}
     double GetWVel() {return _wVel;}
@@ -34,17 +35,25 @@ class Quadcopter
     void SetYAccel(double yAccel) {_yAccel = yAccel;}
     void SetZAccel(double zAccel) {_zAccel = zAccel;}
 
+//Get Quaternion Orientation
+    double Getq0() {return _q0;}
+    double Getq1() {return _q1;}
+    double Getq2() {return _q1;}
+    double Getq3() {return _q1;}
+
 // started from a ball!
     void cgState(double time);
 
+
+/*
     const double GetThrust()const{return motor1Thrust;}   
     const double GetThrust()const{return motor2Thrust;}   
     const double GetThrust()const{return motor3Thrust;}   
     const double GetThrust()const{return motor4Thrust;}   
-
+*/
   private:
 // quadcopter state. might not need it
-    bool on-off;
+    bool on_Off;
 
 // Angular-Velocity |Body  |raw
     double _pAngV;
@@ -72,7 +81,7 @@ class Quadcopter
     double _q3;
 
 
-    double _Time;
+    double _time;
     
 // %thrust provided by motor
     double _motor1Thrust;
