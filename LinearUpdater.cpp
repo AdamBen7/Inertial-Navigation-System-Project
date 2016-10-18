@@ -14,8 +14,8 @@ void LinearUpdater(Quadcopter & MyQuad){
   double mass = 10.0;
   double grav = 9.81;
   double weight = mass * grav;
-  double dtime = 1.0;
-
+  double dtime = MyQuad.GetDTime();
+//I'm past patiently waiting, I'm passionately smashin' every expectation, every action's an act of creation
   double * AccelVec;
   AccelVec = GetAcceleration();
 
@@ -80,9 +80,9 @@ void LinearUpdater(Quadcopter & MyQuad){
   //equations of motion
 
 
-  double du = r*v -q*w + AccelVec[0];
-  double dv = -r*u+p*q + AccelVec[1];
-  double dw = q*u-p*v  + AccelVec[2];
+  double du = r*v - q*w + AccelVec[0];
+  double dv = -r*u + p*w + AccelVec[1];
+  double dw = q*u - p*v  + AccelVec[2];
 
 /* //Commented out atm since we might not need to touch euler angles. 
   double du = r*v -q*w + (X/mass) - grav*sin(eulerX);
