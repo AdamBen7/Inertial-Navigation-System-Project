@@ -9,7 +9,6 @@ double * GetAngularVelocity(){
   string input;
   cout << "Insert u-AngVel, v-AngVel, w-AngVel Values: " << endl;
   getline(cin, input);
-  cerr<<"HI MOM!";
   cin.sync();
   AngVelVec[0] = stod(input);
   getline(cin, input);

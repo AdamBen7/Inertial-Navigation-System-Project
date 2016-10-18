@@ -14,7 +14,7 @@ void LinearUpdater(Quadcopter & MyQuad){
   double mass = 10.0;
   double grav = 9.81;
   double weight = mass * grav;
-  double dtime = 1.0;
+  double dtime = MyQuad.GetDTime();
 
   double * AccelVec;
   AccelVec = GetAcceleration();
@@ -103,6 +103,7 @@ void LinearUpdater(Quadcopter & MyQuad){
   MyQuad.SetVVel(v + dv*dtime);
   MyQuad.SetWVel(w + dw*dtime);
 
+  delete[] AccelVec;
 //  print(dPosVector,3);
 
 //  delete[] QuatVec;

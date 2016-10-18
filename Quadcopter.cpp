@@ -31,11 +31,18 @@ _q1 = 0.0;
 _q2 = 0.0;
 _q3 = 0.0;
 _time = 0.0; //might not put it in quadcopter obj
+_dTime = 0.0;
 
 }
 //consider the destructor later
 
 Quadcopter::~Quadcopter(){}
+
+void Quadcopter::SetTime(double time)
+{
+  _dTime = time - _time;
+  _time = time;
+}
 
 void const Quadcopter::DisplayState()
 {

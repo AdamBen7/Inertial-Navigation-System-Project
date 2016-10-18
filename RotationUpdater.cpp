@@ -7,7 +7,7 @@ double * GetAngularVelocity();
 
 void RotationUpdater(Quadcopter & MyQuad)
 {
-  double dtime = 1.0;
+  double dtime = MyQuad.GetDTime();
   
   double * AngVelVec;
   AngVelVec = GetAngularVelocity();

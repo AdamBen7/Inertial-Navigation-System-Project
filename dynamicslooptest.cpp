@@ -15,7 +15,10 @@ int main(){
 
   while (moving)
   {
-
+    cout << "Enter time from start in seconds: ";
+    getline(cin, input);
+    cin.sync();
+    MyQuad.SetTime(stod(input));
     RotationUpdater(MyQuad);
     LinearUpdater(MyQuad);
     MyQuad.DisplayState();
