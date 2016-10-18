@@ -52,6 +52,10 @@ class Quadcopter
     void Setq2(double q2) {_q2 = q2;}
     void Setq3(double q3) {_q3 = q3;}
 
+    double GetTime() {return _time;}
+    double GetDTime() {return _dTime;}
+    void SetTime(double time);
+
 // started from a ball!
     void cgState(double time);
 
@@ -96,6 +100,7 @@ class Quadcopter
 
 
     double _time;
+    double _dTime;
     
 // %thrust provided by motor
     double _motor1Thrust;
