@@ -4,6 +4,8 @@
 //Decided not to store accel values in Quadcopter.h due to efficiency of code.
 
 #include <iostream>
+#include <string>
+
 using namespace std;
 
 double* GetAcceleration(){

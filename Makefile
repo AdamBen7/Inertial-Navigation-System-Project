@@ -26,3 +26,6 @@ GetLinearAccel.o: GetLinearAccel.cpp
 
 GetAngularVel.o: GetAngularVel.cpp
 	$(CC) $(CFLAGS) -c GetAngularVel.cpp
+
+clean:
+	rm dynamicsloop *.o

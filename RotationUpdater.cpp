@@ -35,4 +35,5 @@ void RotationUpdater(Quadcopter & MyQuad)
   MyQuad.SetQAngVel(AngVelVec[1]);
   MyQuad.SetRAngVel(AngVelVec[2]);
  
+  delete[] AngVelVec;
 }

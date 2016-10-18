@@ -103,6 +103,7 @@ void LinearUpdater(Quadcopter & MyQuad){
   MyQuad.SetVVel(v + dv*dtime);
   MyQuad.SetWVel(w + dw*dtime);
 
+  delete[] AccelVec;
 //  print(dPosVector,3);
 
 //  delete[] QuatVec;
