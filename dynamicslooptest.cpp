@@ -8,12 +8,19 @@ using namespace std;
 void LinearUpdater(Quadcopter &);
 
 int main(){
+  bool moving = true;
   Quadcopter MyQuad;
 
-  LinearUpdater(MyQuad);
-  MyQuad.DisplayState();
+  while (moving)
+  {
 
-  return 0;
+    LinearUpdater(MyQuad);
+    MyQuad.DisplayState();
+    cout << "Keep Moving? 1/0";
+    cin >> moving;
+    cout << endl;
+  }
+    return 0;
 }
 //    return  posMat;
 /*

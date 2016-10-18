@@ -18,9 +18,11 @@ _zPos = 0.0;
 _uVel = 0.0;
 _vVel = 0.0;
 _wVel = 0.0;
+/*
 _xAccel = 0.0;
 _yAccel = 0.0;
 _zAccel = 0.0;
+*/
 _pAngV = 0.0;
 _qAngV = 0.0;
 _rAngV = 0.0;
@@ -40,6 +42,9 @@ void const Quadcopter::DisplayState()
   cout << "xPos: " << _xPos << endl;
   cout << "yPos: " << _yPos << endl;
   cout << "zPos: " << _zPos << endl;
+  cout << "uVel: " << _uVel << endl;
+  cout << "vVel: " << _vVel << endl;
+  cout << "wVel: " << _wVel << endl;
 }
 
 //for loop with updated position, linear velocity, linear accel vectors
