@@ -15,7 +15,7 @@ void LinearUpdater(Quadcopter & MyQuad){
   double grav = 9.81;
   double weight = mass * grav;
   double dtime = MyQuad.GetDTime();
-
+//I'm past patiently waiting, I'm passionately smashin' every expectation, every action's an act of creation
   double * AccelVec;
   AccelVec = GetAcceleration();
 
