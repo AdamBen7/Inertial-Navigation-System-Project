@@ -8,10 +8,17 @@ using namespace std;
 
 double* GetAcceleration(){
   double * AccelVec = new double [3];
+  string input;
   cout << "Insert X-Accel, Y-Accel, Z-Accel Values :" << endl;
-  cin >> AccelVec[0];
-  cin >> AccelVec[1];
-  cin >> AccelVec[2];
+  getline(cin, input);
+  cin.sync();
+  AccelVec[0] = stod(input);
+  getline(cin, input);
+  cin.sync();
+  AccelVec[1] = stod(input);
+  getline(cin, input);
+  cin.sync();
+  AccelVec[2] = stod(input);
 
   return AccelVec;
 }
