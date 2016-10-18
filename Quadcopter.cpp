@@ -39,12 +39,19 @@ Quadcopter::~Quadcopter(){}
 
 void const Quadcopter::DisplayState()
 {
-  cout << "xPos: " << _xPos << endl;
-  cout << "yPos: " << _yPos << endl;
-  cout << "zPos: " << _zPos << endl;
-  cout << "uVel: " << _uVel << endl;
-  cout << "vVel: " << _vVel << endl;
-  cout << "wVel: " << _wVel << endl;
+  cout << "xPos : " << _xPos << endl;
+  cout << "yPos : " << _yPos << endl;
+  cout << "zPos : " << _zPos << endl;
+  cout << "uVel : " << _uVel << endl;
+  cout << "vVel : " << _vVel << endl;
+  cout << "wVel : " << _wVel << endl;
+  cout << "PAngV: " << _pAngV << endl;
+  cout << "QAngV: " << _qAngV << endl;
+  cout << "RAngV: " << _rAngV << endl;
+  cout << "Quat0: " << _q0 << endl;
+  cout << "Quat1: " << _q1 << endl;
+  cout << "Quat2: " << _q2 << endl;
+  cout << "Quat3: " << _q3 << endl;
 }
 
 //for loop with updated position, linear velocity, linear accel vectors

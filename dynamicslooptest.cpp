@@ -6,6 +6,7 @@
 
 using namespace std;
 void LinearUpdater(Quadcopter &);
+void RotationUpdater(Quadcopter &);
 
 int main(){
   bool moving = true;
@@ -14,11 +15,13 @@ int main(){
   while (moving)
   {
 
+    RotationUpdater(MyQuad);
     LinearUpdater(MyQuad);
     MyQuad.DisplayState();
     cout << "Keep Moving? 1/0";
     cin >> moving;
     cout << endl;
+
   }
     return 0;
 }

@@ -3,10 +3,14 @@
 #include "math.h"
 
 using namespace std;
+double * GetAngularVelocity();
 
 void RotationUpdater(Quadcopter & MyQuad)
 {
   double dtime = 1.0;
+  
+  double * AngVelVec;
+  AngVelVec = GetAngularVelocity();
 
   double q0 = MyQuad.Getq0();
   double q1 = MyQuad.Getq1();
@@ -22,9 +26,13 @@ void RotationUpdater(Quadcopter & MyQuad)
   double dq2 = (-q * q0 + r * q1 + -p * q3) / (-2.0);
   double dq3 = (-r * q0 + -q * q1 + p * q2) / (-2.0);
 
-  Setq0(q0 + dq0 * dtime);
-  Setq1(q1 + dq1 * dtime);
-  Setq2(q2 + dq2 * dtime);
-  Setq3(q3 + dq3 * dtime);
-  
+  MyQuad.Setq0(q0 + dq0 * dtime);
+  MyQuad.Setq1(q1 + dq1 * dtime);
+  MyQuad.Setq2(q2 + dq2 * dtime);
+  MyQuad.Setq3(q3 + dq3 * dtime);
+
+  MyQuad.SetPAngVel(AngVelVec[0]);
+  MyQuad.SetQAngVel(AngVelVec[1]);
+  MyQuad.SetRAngVel(AngVelVec[2]);
+ 
 }
