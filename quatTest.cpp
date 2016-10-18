@@ -51,6 +51,7 @@ int main()
 
     rotation.Set(stod(xAxis), stod(yAxis), stod(zAxis), stod(angle));
     orientation = rotation * orientation;    
+    orientation.Normalize();
   }
 }
     
