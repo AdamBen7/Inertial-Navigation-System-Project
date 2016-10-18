@@ -11,6 +11,7 @@ void RotationUpdater(Quadcopter &);
 int main(){
   bool moving = true;
   Quadcopter MyQuad;
+  string input;
 
   while (moving)
   {
@@ -19,7 +20,9 @@ int main(){
     LinearUpdater(MyQuad);
     MyQuad.DisplayState();
     cout << "Keep Moving? 1/0";
-    cin >> moving;
+    getline(cin, input);
+    cin.sync();
+    moving = stod(input);
     cout << endl;
 
   }
