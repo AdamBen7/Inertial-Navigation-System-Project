@@ -6,6 +6,7 @@ using namespace std;
 
 double * GetAngularVelocity(){
   double * AngVelVec = new double [3];
+  /*
   string input;
   cout << "Insert u-AngVel, v-AngVel, w-AngVel Values: " << endl;
   getline(cin, input);
@@ -17,5 +18,11 @@ double * GetAngularVelocity(){
   getline(cin, input);
   cin.sync();
   AngVelVec[2] = stod(input);
+  */
+
+  AngVelVec[0] = 0.0;
+  AngVelVec[1] = 0.0;
+  AngVelVec[2] = 0.0;
+
   return AngVelVec;
 }

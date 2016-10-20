@@ -44,8 +44,8 @@ class Quadcopter
 //Get Quaternion Orientation
     double Getq0() {return _q0;}
     double Getq1() {return _q1;}
-    double Getq2() {return _q1;}
-    double Getq3() {return _q1;}
+    double Getq2() {return _q2;}
+    double Getq3() {return _q3;}
 
     void Setq0(double q0) {_q0 = q0;}
     void Setq1(double q1) {_q1 = q1;}

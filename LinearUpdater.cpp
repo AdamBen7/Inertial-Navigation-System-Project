@@ -15,7 +15,7 @@ void LinearUpdater(Quadcopter & MyQuad){
   double grav = 9.81;
   double weight = mass * grav;
   double dtime = MyQuad.GetDTime();
-//I'm past patiently waiting, I'm passionately smashin' every expectation, every action's an act of creation
+//I'm past patiently waitin', I'm passionately smashin' every expectation, every action's an act of creation
   double * AccelVec;
   AccelVec = GetAcceleration();
 
@@ -92,8 +92,8 @@ void LinearUpdater(Quadcopter & MyQuad){
   //acceleration in body frame
   double dVelVector[3] = {du, dv, dw};
 */
-  cerr << "Hi everyone!"; 
-  cout << dPosVector[0] << endl;
+  //cerr << "Hi everyone!"; 
+  //cout << dPosVector[0] << endl;
   // Update Quadcopter Object
   MyQuad.SetXPos(xPos + dPosVector[0]*dtime);
   MyQuad.SetYPos(yPos + dPosVector[1]*dtime);
