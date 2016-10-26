@@ -22,6 +22,8 @@ int main(){
     MyQuad.DisplayState();
     cout << endl;
 
+    MyQuad.WriteToFile();
+
   }
     return 0;
 }

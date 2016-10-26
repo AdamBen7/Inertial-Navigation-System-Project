@@ -1,5 +1,7 @@
-
+#include <fstream>
 //class Motor;
+
+using namespace std;
 
 class Quadcopter
 {
@@ -61,6 +63,8 @@ class Quadcopter
 
     void const DisplayState();
 
+    void const WriteToFile();
+
 /*
     const double GetThrust()const{return motor1Thrust;}   
     const double GetThrust()const{return motor2Thrust;}   
@@ -70,6 +74,8 @@ class Quadcopter
   private:
 // quadcopter state. might not need it
     bool on_Off;
+    
+    ofstream outputFile;
 
     double _mass;
 // Angular-Velocity |Body  |raw

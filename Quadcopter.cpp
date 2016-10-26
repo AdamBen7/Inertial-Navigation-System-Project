@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "Quadcopter.h"
 
 
@@ -33,10 +34,14 @@ _q3 = 0.0;
 _time = 0.0; //might not put it in quadcopter obj
 _dTime = 0.0;
 
+outputFile.open("QuadOutput.txt");
+
 }
 //consider the destructor later
 
-Quadcopter::~Quadcopter(){}
+Quadcopter::~Quadcopter(){
+  outputFile.close();
+}
 
 void Quadcopter::SetTime(double time)
 {
@@ -59,6 +64,14 @@ void const Quadcopter::DisplayState()
   cout << "Quat1: " << _q1 << endl;
   cout << "Quat2: " << _q2 << endl;
   cout << "Quat3: " << _q3 << endl;
+}
+
+void const Quadcopter::WriteToFile()
+{
+ 
+  if (outputFile.is_open()) 
+  outputFile << _xPos << "	" << _yPos << "	" << _zPos << "	" << _time <<  "\n";
+
 }
 
 //for loop with updated position, linear velocity, linear accel vectors

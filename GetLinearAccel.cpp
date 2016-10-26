@@ -24,9 +24,9 @@ double* GetAcceleration(){
   AccelVec[2] = stod(input);
   */
 
-  AccelVec[0] = 1.0;
+  AccelVec[0] = 2.0;
   AccelVec[1] = 0.0;
-  AccelVec[2] = 0.0;
+  AccelVec[2] = 1.0;
 
   return AccelVec;
 }
