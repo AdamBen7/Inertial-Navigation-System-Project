@@ -3,6 +3,7 @@
 #include "Quadcopter.h"
 //#include "EulertoQuatLib.h"
 //Compile with postionupdate.cpp
+//For Loop of Time which runs with hardcoded accel/angVel "input" data
 
 using namespace std;
 void LinearUpdater(Quadcopter &);

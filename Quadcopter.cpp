@@ -70,7 +70,9 @@ void const Quadcopter::WriteToFile()
 {
  
   if (outputFile.is_open()) 
-  outputFile << _xPos << "	" << _yPos << "	" << _zPos << "	" << _time <<  "\n";
+  outputFile << _time<<"	"<< _xPos << "	" << _yPos << "	" << _zPos << "	" << _uVel<<"	"<< _vVel<<"	"<<_wVel<<"	"<<_pAngV<<"	"<<_qAngV <<"	"<<_rAngV
+	<<"	"<< _q0 <<"	"<< _q1<<"	"<< _q2 <<"	"<< _q3 <<"\n";
+
 
 }
 
