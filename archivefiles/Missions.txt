@@ -1,0 +1,25 @@
+Missions for us:
+Code Quadcopter Flight Numerical Model
+
+Create A Makefile
+Compiles Quadcopter.cpp with updateposition, updaterotation functions (matrixlib will be includes)
+
+
+
+DONE: -Create a mathematical model of a ball Adam could kick
+DONE: -Keep Learning more about quanternions
+DONE: -Code CANbus communication testing 
+
+--------------------
+
+Deliverables:
+- Figure out quaternion initialization based on accelerometer readings
+- Replot data/graph to test.
+- Move to Teensy (graduate from adafruit)
+- 
+
+
+Calculate ofsets
+-ask chris
+
+-keep a lab notebook on notes of what good and what;s ineffective (regarding anything I guess?)
