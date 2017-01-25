@@ -18,6 +18,7 @@ void setup()
   delay(10);
   Serial.begin(9600);
   delay(10);
+  Serial.print("Initializing...");
   GY85.init();
   InitGravity(MyQuad);
   //grav = InitializeGravity();
@@ -40,16 +41,10 @@ void loop()
 
 void LinearUpdater(Quadcopter & SomeQuad) {
 
-  double mass = 10.0;
-  double weight = mass * grav;
   double dtime = SomeQuad.GetDTime();
-  //I'm past patiently waitin', I'm passionately smashin' every expectation, every action's an act of creation
   double * AccelVec;
   AccelVec = GetAcceleration();
 
-  double xAccel = AccelVec[0] - SomeQuad.GetGravityX(); //xAccel - Gravity
-  double yAccel = AccelVec[1] - SomeQuad.GetGravityY(); //yAccel
-  double zAccel = AccelVec[2] - SomeQuad.GetGravityZ(); //zAccel
 
 /*      Serial.print('\n');
   Serial.print((double)millis() / 1000.0);
@@ -90,20 +85,28 @@ void LinearUpdater(Quadcopter & SomeQuad) {
   double q = SomeQuad.GetQAngVel();
   double r = SomeQuad.GetRAngVel();
 
-  //LinearForces Experienced
-  double X = 0.0;
-  double Y = 0.0;
-  double Z = 0.0;
-
   double BMat[][3] =
   { {q0*q0 + q1*q1 - q2*q2 - q3 * q3, 2 * (q1 * q2 - q0 * q3),         2 * (q1 * q3 + q0 * q2)},
     {2.0 * (q1 * q2 + q0 * q3),        q0*q0 - q1*q1 + q2*q2 - q3 * q3, 2.0 * (q2 * q3 - q0 * q1)},
     {2.0 * (q1 * q3 - q0 * q2),        2.0 * (q2 * q3 + q0 * q1),       q0*q0 - q1*q1 - q2*q2 + q3 * q3}
   };
 
-  double dxPos = BMat[0][0] * LVelVec[0] + BMat[0][1] * LVelVec[1] + BMat[0][2] * LVelVec[2] ;
-  double dyPos = BMat[1][0] * LVelVec[0] + BMat[1][1] * LVelVec[1] + BMat[1][2] * LVelVec[2] ;
-  double dzPos = BMat[2][0] * LVelVec[0] + BMat[2][1] * LVelVec[1] + BMat[2][2] * LVelVec[2] ;
+  double xAccel = BMat[0][0] * AccelVec[0] + BMat[0][1] * AccelVec[1] + BMat[0][2] * AccelVec[2] ;
+  double yAccel = BMat[1][0] * AccelVec[0] + BMat[1][1] * AccelVec[1] + BMat[1][2] * AccelVec[2] ;
+  double zAccel = BMat[2][0] * AccelVec[0] + BMat[2][1] * AccelVec[1] + BMat[2][2] * AccelVec[2] ;
+
+  double dxVel = xAccel - SomeQuad.GetGravityX(); //xAccel - Gravity
+  double dyVel = yAccel - SomeQuad.GetGravityY(); //yAccel
+  double dzVel = zAccel - SomeQuad.GetGravityZ(); //zAccel
+
+
+  double dxPos = SomeQuad.GetdXPos() + (dxVel * dtime);
+  double dyPos = SomeQuad.GetdYPos() + (dyVel * dtime);
+  double dzPos = SomeQuad.GetdZPos() + (dzVel * dtime);
+
+  SomeQuad.SetdXPos(dxPos);
+  SomeQuad.SetdYPos(dyPos);
+  SomeQuad.SetdZPos(dzPos);
 
   //derivative of x,y,z
   double dPosVector[3] = {dxPos, dyPos, dzPos};
@@ -118,20 +121,15 @@ void LinearUpdater(Quadcopter & SomeQuad) {
   double dw = q * u - p * v  + zAccel;
 */
   // For tilting purposes... figure it out
-  
+/*  
   double du = r * v - q * w + AccelVec[0] - (grav * 2 * (q0 * q2 - q1 * q3));
   double dv = -r * u + p * w + AccelVec[1] + (grav * cosTheta * sin(phi));
   double dw = q * u - p * v  + AccelVec[2] + (grav * cosTheta * cos(phi));
+*/
   
-
-  /* //Commented out atm since we might not need to touch euler angles.
-    double du = r*v -q*w + (X/mass) - grav*sin(eulerX);
-    double dv = -r*u+p*q + (Y/mass) - grav*cos(eulerX)*sin(eulerY);
-    double dw = q*u-p*v  + (Z/mass) - grav*cos(eulerX)*cos(eulerY);
-
-    //acceleration in body frame
-    double dVelVector[3] = {du, dv, dw};
-  */
+  double du = r * v - q * w  + AccelVec[0] - SomeQuad.GetGravityX();
+  double dv = -r * u + p * w + AccelVec[1] - SomeQuad.GetGravityY();
+  double dw = q * u - p * v  + AccelVec[2] - SomeQuad.GetGravityZ();
 
   // Update Quadcopter Object
   SomeQuad.SetXPos(xPos + dPosVector[0]*dtime);
@@ -223,18 +221,18 @@ double * GetCompassReadings() {
 void InitGravity(Quadcopter & SomeQuad) { 
   double * GravityVec = new double [3];
   double * AccelVec = new double [3];
-  double range = 80.0;
+  double range = 1000.0;
   
-  for (int i = 0; i < 81; i++){
+  for (int i = 0; i < 1001; i++){
     AccelVec = GetAcceleration();
     GravityVec[0] += AccelVec[0];
     GravityVec[1] += AccelVec[1];
     GravityVec[2] += AccelVec[2];   
-    if(i == range)
-    {
-      GravityVec[0]/=range;
-      GravityVec[1]/=range;
-      GravityVec[2]/=range;
+  }
+    
+  GravityVec[0]/=range;
+  GravityVec[1]/=range;
+  GravityVec[2]/=range;
 
       //GravityVec[1]-= 1; //calibrating 
       
@@ -247,12 +245,12 @@ void InitGravity(Quadcopter & SomeQuad) {
     Serial.print(GravityVec[2]);
     Serial.print('\n');
     */
-      SomeQuad.SetGravityX(GravityVec[0]);
-      SomeQuad.SetGravityY(GravityVec[1]);
-      SomeQuad.SetGravityZ(GravityVec[2]);   
-    }
-    delay(10);
-  }
+  SomeQuad.SetGravityX(GravityVec[0]);
+  SomeQuad.SetGravityY(GravityVec[1]);
+  SomeQuad.SetGravityZ(GravityVec[2]);   
+    
+  delay(10);
+  
 /*
   double magnitude = sqrt(AccelVec[0]*AccelVec[0] + AccelVec[1]*AccelVec[1] + AccelVec[2]*AccelVec[2]);
   AccelVec[0] /= magnitude;
@@ -274,7 +272,7 @@ void InitGravity(Quadcopter & SomeQuad) {
     SomeQuad.Setq2(0.0);
     SomeQuad.Setq3(AccelVec[0] / sqrt(2.0 * (1.0 - AccelVec[2])));
 */
-    delay(10);
+  delay(10);
   delete[] GravityVec;
   delete[] AccelVec;
 }
@@ -287,6 +285,7 @@ void DisplayState()
     //Serial.print("xPos : ");
     //Serial.print('\t');
     Serial.print((double)millis()/1000.0);
+    /*
     Serial.print('\t');    
     Serial.print(MyQuad.GetXPos() );
     //Serial.print("\tyPos : ");
@@ -296,6 +295,13 @@ void DisplayState()
     Serial.print('\t');
     Serial.print(MyQuad.GetZPos() );
     //Serial.print("\tuVel : ");
+    */
+    Serial.print('\t');
+    Serial.print(MyQuad.GetdXPos() );
+    Serial.print('\t');
+    Serial.print(MyQuad.GetdYPos() );
+    Serial.print('\t');
+    Serial.print(MyQuad.GetdZPos() );
     Serial.print('\t');
     Serial.print(MyQuad.GetUVel() );
     //Serial.print("\tvVel : ");
@@ -305,6 +311,7 @@ void DisplayState()
     Serial.print('\t');
     Serial.print(MyQuad.GetWVel() );
     //Serial.print("\tPAngV: ");
+    /*
     Serial.print('\t');
     Serial.print(MyQuad.GetPAngVel() );
     //Serial.print("\tQAngV: ");
@@ -325,8 +332,9 @@ void DisplayState()
     //Serial.print("\tQuat3: ");
     Serial.print('\t');
     Serial.print(MyQuad.Getq3() );
+    */
     Serial.print('\n');
-    
+
 
 
 
