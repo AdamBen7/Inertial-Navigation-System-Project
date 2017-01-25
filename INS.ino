@@ -70,6 +70,8 @@ void RotationUpdater(Quadcopter & SomeQuad)
   SomeQuad.Setq2(q2 + dq2 * dtime);
   SomeQuad.Setq3(q3 + dq3 * dtime);
 
+  SomeQuad.NormalizeQuat();
+
   SomeQuad.SetPAngVel(AngVelVec[0]);
   SomeQuad.SetQAngVel(AngVelVec[1]);
   SomeQuad.SetRAngVel(AngVelVec[2]);
