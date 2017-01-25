@@ -18,6 +18,14 @@ class Quadcopter
     void SetXPos(double xPos) {_xPos = xPos;}
     void SetYPos(double yPos) {_yPos = yPos;}
     void SetZPos(double zPos) {_zPos = zPos;}
+    
+    double GetdXPos() {return _dxPos;}
+    double GetdYPos() {return _dyPos;}
+    double GetdZPos() {return _dzPos;}
+
+    void SetdXPos(double dxPos) {_dxPos = dxPos;}
+    void SetdYPos(double dyPos) {_dyPos = dyPos;}
+    void SetdZPos(double dzPos) {_dzPos = dzPos;}
 
     double GetPAngVel() {return _pAngV;}
     double GetQAngVel() {return _qAngV;}
@@ -114,6 +122,11 @@ class Quadcopter
     double _xPos;
     double _yPos;
     double _zPos;
+    
+// Linear velocity  |Global|from accel
+    double _dxPos;
+    double _dyPos;
+    double _dzPos;
     
 // Linear velocity  |Body  |from accel
     double _uVel;

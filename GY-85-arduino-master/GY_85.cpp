@@ -5,7 +5,7 @@ void GY_85::SetAccelerometer()
     //Put the ADXL345 into +/- 4G range by writing the value 0x01 to the DATA_FORMAT register.
     Wire.beginTransmission( ADXL345 );      // start transmission to device
     Wire.write( 0x31 );                     // send register address
-    Wire.write( 0x01 );                     // send value to write
+    Wire.write( 0x09 );                     // send value to write
     Wire.endTransmission();                 // end transmission
     
     //Put the ADXL345 into Measurement Mode by writing 0x08 to the POWER_CTL register.
