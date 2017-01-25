@@ -1,6 +1,7 @@
 //#include <iostream>
 //#include <fstream>
 #include "Quadcopter.h"
+#include "math.h"
 
 
 //probably UpdatePos, UpdateLinearVel, UpdateAngVel
@@ -52,6 +53,16 @@ void Quadcopter::SetTime(double time)
   _time = time;
 }
 
+void Quadcopter::NormalizeQuat()
+{
+  double quatMag = sqrt((_q0*_q0) + (_q1*_q1) + (_q2*_q2) + (_q3*_q3));
+  _q0 /= quatMag;
+  _q1 /= quatMag;
+  _q2 /= quatMag;
+  _q3 /= quatMag;
+ 
+
+}
 /*void const Quadcopter::DisplayState()
 {
   cout << "xPos : " << _xPos << endl;

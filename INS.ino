@@ -21,7 +21,6 @@ void setup()
   Serial.print("Initializing...");
   GY85.init();
   InitGravity(MyQuad);
-  //grav = InitializeGravity();
   delay(10);
   
 }
@@ -39,30 +38,54 @@ void loop()
   DisplayState();
 }
 
+
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//++++++++++++++++++    Rotation Updater    ++++++++++++++++++++
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+void RotationUpdater(Quadcopter & SomeQuad)
+{
+  double dtime = SomeQuad.GetDTime();
+
+  double * AngVelVec;
+  AngVelVec = GetAngularVelocity();
+
+  double q0 = SomeQuad.Getq0();
+  double q1 = SomeQuad.Getq1();
+  double q2 = SomeQuad.Getq2();
+  double q3 = SomeQuad.Getq3();
+
+  double p = SomeQuad.GetPAngVel();
+  double q = SomeQuad.GetQAngVel();
+  double r = SomeQuad.GetRAngVel();
+
+  double dq0 = (p * q1 + q * q2 + r * q3) / (-2.0);
+  double dq1 = ((-1 * p * q0) + (-1 * r * q2) + (q * q3)) / (-2.0);
+  double dq2 = ((-1 * q * q0) + (r * q1) + (-1 * p * q3)) / (-2.0);
+  double dq3 = ((-1 * r * q0) + (-1 * q * q1) + (p * q2)) / (-2.0);
+
+  SomeQuad.Setq0(q0 + dq0 * dtime);
+  SomeQuad.Setq1(q1 + dq1 * dtime);
+  SomeQuad.Setq2(q2 + dq2 * dtime);
+  SomeQuad.Setq3(q3 + dq3 * dtime);
+
+  SomeQuad.SetPAngVel(AngVelVec[0]);
+  SomeQuad.SetQAngVel(AngVelVec[1]);
+  SomeQuad.SetRAngVel(AngVelVec[2]);
+
+  delete[] AngVelVec;
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//++++++++++++++++++    Linear Updater    ++++++++++++++++++++++
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 void LinearUpdater(Quadcopter & SomeQuad) {
 
   double dtime = SomeQuad.GetDTime();
   double * AccelVec;
   AccelVec = GetAcceleration();
-
-
-/*      Serial.print('\n');
-  Serial.print((double)millis() / 1000.0);
-      Serial.print('\t');
-  Serial.print(xAccel);
-      Serial.print('\t');
-  Serial.print(yAccel);
-      Serial.print('\t');
-  Serial.print(zAccel);
-      Serial.print('\t');
-
-      Serial.print('\t');
-  Serial.print(SomeQuad.GetGravityX());
-      Serial.print('\t');
-  Serial.print(SomeQuad.GetGravityY());
-      Serial.print('\t');
-  Serial.print(SomeQuad.GetGravityZ());
-      Serial.print('\t');*/
 
   double q0 = SomeQuad.Getq0();
   double q1 = SomeQuad.Getq1();
@@ -143,38 +166,10 @@ void LinearUpdater(Quadcopter & SomeQuad) {
   delete[] AccelVec;
 }
 
-void RotationUpdater(Quadcopter & SomeQuad)
-{
-  double dtime = SomeQuad.GetDTime();
 
-  double * AngVelVec;
-  AngVelVec = GetAngularVelocity();
-
-  double q0 = SomeQuad.Getq0();
-  double q1 = SomeQuad.Getq1();
-  double q2 = SomeQuad.Getq2();
-  double q3 = SomeQuad.Getq3();
-
-  double p = SomeQuad.GetPAngVel();
-  double q = SomeQuad.GetQAngVel();
-  double r = SomeQuad.GetRAngVel();
-
-  double dq0 = (p * q1 + q * q2 + r * q3) / (-2.0);
-  double dq1 = ((-1 * p * q0) + (-1 * r * q2) + (q * q3)) / (-2.0);
-  double dq2 = ((-1 * q * q0) + (r * q1) + (-1 * p * q3)) / (-2.0);
-  double dq3 = ((-1 * r * q0) + (-1 * q * q1) + (p * q2)) / (-2.0);
-
-  SomeQuad.Setq0(q0 + dq0 * dtime);
-  SomeQuad.Setq1(q1 + dq1 * dtime);
-  SomeQuad.Setq2(q2 + dq2 * dtime);
-  SomeQuad.Setq3(q3 + dq3 * dtime);
-
-  SomeQuad.SetPAngVel(AngVelVec[0]);
-  SomeQuad.SetQAngVel(AngVelVec[1]);
-  SomeQuad.SetRAngVel(AngVelVec[2]);
-
-  delete[] AngVelVec;
-}
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//++++++++++++++++++++++++    STATE VECTORS    ++++++++++++++++++++++++
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 double* GetAcceleration() {
   double * AccelVec = new double [3];
@@ -250,28 +245,6 @@ void InitGravity(Quadcopter & SomeQuad) {
   SomeQuad.SetGravityZ(GravityVec[2]);   
     
   delay(10);
-  
-/*
-  double magnitude = sqrt(AccelVec[0]*AccelVec[0] + AccelVec[1]*AccelVec[1] + AccelVec[2]*AccelVec[2]);
-  AccelVec[0] /= magnitude;
-  AccelVec[1] /= magnitude;
-  AccelVec[2] /= magnitude;
-
-    if (AccelVec[3] >= 0.0)
-  {
-    SomeQuad.Setq0(sqrt((AccelVec[2] + 1.0) / 2.0));
-    SomeQuad.Setq1(-1.0 * AccelVec[1] / sqrt(2.0 * (AccelVec[2] + 1.0)));
-    SomeQuad.Setq2(AccelVec[0] /sqrt(2.0 * (AccelVec[2] + 1.0)));
-    SomeQuad.Setq3(0.0);
-  }
-
-  if (AccelVec[3] < 0.0)
-  {
-    SomeQuad.Setq0(-1.0 * AccelVec[1] /sqrt(2.0 * (1.0 - AccelVec[2])));
-    SomeQuad.Setq1(sqrt((1.0 - AccelVec[2]) / 2.0));
-    SomeQuad.Setq2(0.0);
-    SomeQuad.Setq3(AccelVec[0] / sqrt(2.0 * (1.0 - AccelVec[2])));
-*/
   delay(10);
   delete[] GravityVec;
   delete[] AccelVec;
@@ -285,7 +258,7 @@ void DisplayState()
     //Serial.print("xPos : ");
     //Serial.print('\t');
     Serial.print((double)millis()/1000.0);
-    /*
+    
     Serial.print('\t');    
     Serial.print(MyQuad.GetXPos() );
     //Serial.print("\tyPos : ");
@@ -295,13 +268,13 @@ void DisplayState()
     Serial.print('\t');
     Serial.print(MyQuad.GetZPos() );
     //Serial.print("\tuVel : ");
-    */
-    Serial.print('\t');
+
+/*    Serial.print('\t');
     Serial.print(MyQuad.GetdXPos() );
     Serial.print('\t');
     Serial.print(MyQuad.GetdYPos() );
     Serial.print('\t');
-    Serial.print(MyQuad.GetdZPos() );
+    Serial.print(MyQuad.GetdZPos() );*/
     Serial.print('\t');
     Serial.print(MyQuad.GetUVel() );
     //Serial.print("\tvVel : ");
@@ -311,7 +284,7 @@ void DisplayState()
     Serial.print('\t');
     Serial.print(MyQuad.GetWVel() );
     //Serial.print("\tPAngV: ");
-    /*
+    
     Serial.print('\t');
     Serial.print(MyQuad.GetPAngVel() );
     //Serial.print("\tQAngV: ");
@@ -332,7 +305,7 @@ void DisplayState()
     //Serial.print("\tQuat3: ");
     Serial.print('\t');
     Serial.print(MyQuad.Getq3() );
-    */
+
     Serial.print('\n');
 
 
@@ -364,5 +337,48 @@ void DisplayState()
   //    delete[] AccelVec;
   delete[] AngVelVec;
   //delete[] CompassVec;*/
+
+  
+/*      Serial.print('\n');
+  Serial.print((double)millis() / 1000.0);
+      Serial.print('\t');
+  Serial.print(xAccel);
+      Serial.print('\t');
+  Serial.print(yAccel);
+      Serial.print('\t');
+  Serial.print(zAccel);
+      Serial.print('\t');
+
+      Serial.print('\t');
+  Serial.print(SomeQuad.GetGravityX());
+      Serial.print('\t');
+  Serial.print(SomeQuad.GetGravityY());
+      Serial.print('\t');
+  Serial.print(SomeQuad.GetGravityZ());
+      Serial.print('\t');*/
+
+
+/*
+  double magnitude = sqrt(AccelVec[0]*AccelVec[0] + AccelVec[1]*AccelVec[1] + AccelVec[2]*AccelVec[2]);
+  AccelVec[0] /= magnitude;
+  AccelVec[1] /= magnitude;
+  AccelVec[2] /= magnitude;
+
+    if (AccelVec[3] >= 0.0)
+  {
+    SomeQuad.Setq0(sqrt((AccelVec[2] + 1.0) / 2.0));
+    SomeQuad.Setq1(-1.0 * AccelVec[1] / sqrt(2.0 * (AccelVec[2] + 1.0)));
+    SomeQuad.Setq2(AccelVec[0] /sqrt(2.0 * (AccelVec[2] + 1.0)));
+    SomeQuad.Setq3(0.0);
+  }
+
+  if (AccelVec[3] < 0.0)
+  {
+    SomeQuad.Setq0(-1.0 * AccelVec[1] /sqrt(2.0 * (1.0 - AccelVec[2])));
+    SomeQuad.Setq1(sqrt((1.0 - AccelVec[2]) / 2.0));
+    SomeQuad.Setq2(0.0);
+    SomeQuad.Setq3(AccelVec[0] / sqrt(2.0 * (1.0 - AccelVec[2])));
+*/
 }
+
 

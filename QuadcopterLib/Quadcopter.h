@@ -72,6 +72,8 @@ class Quadcopter
     void Setq2(double q2) {_q2 = q2;}
     void Setq3(double q3) {_q3 = q3;}
 
+	void NormalizeQuat();
+
 	double GetPhi() {return atan((2*_q0*_q1 + _q2*_q3)/(_q0*_q0 - _q1*_q1 - _q2*_q2 + _q3*_q3));}
 	double GetTheta() { return asin(2*(_q0*_q2 - _q1*_q3));}
 	double GetPsi() {return atan((2*_q0*_q3 + _q1*_q2)/(_q0*_q0 + _q1*_q1 - _q2*_q2 - _q3*_q3));}
