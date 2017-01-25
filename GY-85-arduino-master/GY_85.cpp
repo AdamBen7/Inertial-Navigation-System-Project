@@ -5,7 +5,7 @@ void GY_85::SetAccelerometer()
     //Put the ADXL345 into +/- 4G range by writing the value 0x01 to the DATA_FORMAT register.
     Wire.beginTransmission( ADXL345 );      // start transmission to device
     Wire.write( 0x31 );                     // send register address
-    Wire.write( 0x09 );                     // send value to write
+    Wire.write( 0x01 );                     // send value to write
     Wire.endTransmission();                 // end transmission
     
     //Put the ADXL345 into Measurement Mode by writing 0x08 to the POWER_CTL register.
@@ -16,10 +16,10 @@ void GY_85::SetAccelerometer()
     
 }
 
-int* GY_85::readFromAccelerometer()
+short int* GY_85::readFromAccelerometer()
 {
-    static int axis[3];
-    int buff[6];
+    static short int axis[3];
+    short int buff[6];
     
     Wire.beginTransmission( ADXL345 );      // start transmission to device
     Wire.write( DATAX0 );                   // sends address to read from
@@ -52,9 +52,9 @@ void GY_85::SetCompass()
     Wire.endTransmission();
 }
 
-int* GY_85::readFromCompass()
+short int* GY_85::readFromCompass()
 {
-    static int axis[3];
+    static short int axis[3];
     
     //Tell the HMC5883 where to begin reading data
     Wire.beginTransmission( HMC5883 );
@@ -133,6 +133,7 @@ void GY_85::GyroCalibrate()
 
 float* GY_85::readGyro()
 {
+    static short int intAxis[4];
     static float axis[4];
     
     Wire.beginTransmission( ITG3200 );
@@ -151,10 +152,13 @@ float* GY_85::readGyro()
     }
     Wire.endTransmission();
     
-    axis[0] = ((buff[4] << 8) | buff[5]) - g_offx;
-    axis[1] = ((buff[2] << 8) | buff[3]) - g_offy;
-    axis[2] = ((buff[6] << 8) | buff[7]) - g_offz;
-    axis[3] = ((buff[0] << 8) | buff[1]);       // temperature
+    intAxis[0] = ((buff[4] << 8) | buff[5]) - g_offx;
+    intAxis[1] = ((buff[2] << 8) | buff[3]) - g_offy;
+    intAxis[2] = ((buff[6] << 8) | buff[7]) - g_offz;
+    intAxis[3] = ((buff[0] << 8) | buff[1]);       // temperature
+    
+    for (i = 0; i < 4; i++)
+        axis[i] = (float)intAxis[i];
     
     return axis;
 }

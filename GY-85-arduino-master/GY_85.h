@@ -27,20 +27,20 @@ private:
     
 public:
     void   init();
-    int*   readFromAccelerometer();
-    int*   readFromCompass();
+    short int*   readFromAccelerometer();
+    short int*   readFromCompass();
     float* readGyro();
     
     //callback functions
-    inline int accelerometer_x( int* a ){ return *(   a ); }
-    inline int accelerometer_y( int* a ){ return *( 1+a ); }
-    inline int accelerometer_z( int* a ){ return *( 2+a ); }
+    inline short int accelerometer_x( short int* a ){ return *(   a ); }
+    inline short int accelerometer_y( short int* a ){ return *( 1+a ); }
+    inline short int accelerometer_z( short int* a ){ return *( 2+a ); }
     
     //-----------------------------------
     
-    inline int compass_x( int* a ){ return *(   a ); }
-    inline int compass_y( int* a ){ return *( 1+a ); }
-    inline int compass_z( int* a ){ return *( 2+a ); }
+    inline short int compass_x( short int* a ){ return *(   a ); }
+    inline short int compass_y( short int* a ){ return *( 1+a ); }
+    inline short int compass_z( short int* a ){ return *( 2+a ); }
     
     //-----------------------------------
     
