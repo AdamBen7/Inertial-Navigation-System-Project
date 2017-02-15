@@ -35,6 +35,7 @@ void loop()
     RotationUpdater(MyQuad);
     LinearUpdater(MyQuad);
   }
+  
   DisplayState();
 }
 
@@ -271,12 +272,6 @@ void DisplayState()
     Serial.print(MyQuad.GetZPos() );
     //Serial.print("\tuVel : ");
 
-/*    Serial.print('\t');
-    Serial.print(MyQuad.GetdXPos() );
-    Serial.print('\t');
-    Serial.print(MyQuad.GetdYPos() );
-    Serial.print('\t');
-    Serial.print(MyQuad.GetdZPos() );*/
     Serial.print('\t');
     Serial.print(MyQuad.GetUVel() );
     //Serial.print("\tvVel : ");
@@ -309,37 +304,6 @@ void DisplayState()
     Serial.print(MyQuad.Getq3() );
 
     Serial.print('\n');
-
-
-
-
-    /*  double * AccelVec;
-  double * AngVelVec;
-  double * CompassVec;
-
-  AccelVec = GetAcceleration();
-  delay(500);
-  CompassVec = GetCompassReadings();
-  AngVelVec = GetAngularVelocity();
-
-  Serial.print((double)millis() / 1000.0);
-  Serial.print('\t');
-  //Serial.print(AccelVec[0]);
-  Serial.print(AngVelVec[0]);
-  //Serial.print(CompassVec[0]);
-  Serial.print('\t');
-  //Serial.print(AccelVec[1]);
-  //Serial.print(CompassVec[1]);
-  Serial.print(AngVelVec[1]);
-  Serial.print('\t');
-  //Serial.print(AccelVec[2]);
-  //Serial.print(CompassVec[2]);
-  Serial.print(AngVelVec[2]);
-  Serial.print('\n');
-  //    delete[] AccelVec;
-  delete[] AngVelVec;
-  //delete[] CompassVec;*/
-
   
 /*      Serial.print('\n');
   Serial.print((double)millis() / 1000.0);
@@ -381,6 +345,39 @@ void DisplayState()
     SomeQuad.Setq2(0.0);
     SomeQuad.Setq3(AccelVec[0] / sqrt(2.0 * (1.0 - AccelVec[2])));
 */
+
+/*    Serial.print('\t');
+    Serial.print(MyQuad.GetdXPos() );
+    Serial.print('\t');
+    Serial.print(MyQuad.GetdYPos() );
+    Serial.print('\t');
+    Serial.print(MyQuad.GetdZPos() );*/
+    /*  double * AccelVec;
+  double * AngVelVec;
+  double * CompassVec;
+
+  AccelVec = GetAcceleration();
+  CompassVec = GetCompassReadings();
+  AngVelVec = GetAngularVelocity();
+
+  Serial.print((double)millis() / 1000.0);
+  Serial.print('\t');
+  Serial.print(AccelVec[0]);
+  //Serial.print(AngVelVec[0]);
+  //Serial.print(CompassVec[0]);
+  Serial.print('\t');
+  Serial.print(AccelVec[1]);
+  //Serial.print(CompassVec[1]);
+  //Serial.print(AngVelVec[1]);
+  Serial.print('\t');
+  Serial.print(AccelVec[2]);
+  //Serial.print(CompassVec[2]);
+  //Serial.print(AngVelVec[2]);
+  Serial.print('\n');
+  delete[] AccelVec;
+  //delete[] AngVelVec;
+  //delete[] CompassVec;*/
+
 }
 
 
