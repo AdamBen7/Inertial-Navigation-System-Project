@@ -7,14 +7,14 @@ char choice;
 // Raw Ranges:
 // initialize to mid-range and allow calibration to
 // find the minimum and maximum for each axis
-int xRawMin = 512;
-int xRawMax = 512;
+double xRawMin = 0;
+double xRawMax = 0;
 
-int yRawMin = 512;
-int yRawMax = 512;
+double yRawMin = 0;
+double yRawMax = 0;
 
-int zRawMin = 512;
-int zRawMax = 512;
+double zRawMin = 0;
+double zRawMax = 0;
 
 // Take multiple samples to reduce noise
 const int sampleSize = 10;
@@ -31,14 +31,28 @@ void setup()
 
 void loop() 
 {
-  int xRaw = GY85.accelerometer_x( GY85.readFromAccelerometer() );
-  int yRaw = GY85.accelerometer_x( GY85.readFromAccelerometer() );
-  int zRaw = GY85.accelerometer_x( GY85.readFromAccelerometer() );
+  
+  double xRaw = 0;
+  double yRaw = 0;
+  double zRaw = 0;
+  
+  for(int i=0; i<100; i++){
+    xRaw += GY85.accelerometer_x( GY85.readFromAccelerometer() );
+    yRaw += GY85.accelerometer_y( GY85.readFromAccelerometer() );
+    zRaw += GY85.accelerometer_z( GY85.readFromAccelerometer() );
+  }
 
-//while(Serial.available() > 0)
-  Serial.print("Enter 'c' for calibrating.");
-//  choice = Serial.read();
-choice = 'c';
+  xRaw /= 100.0;
+  yRaw /= 100.0;
+  zRaw /= 100.0;
+    
+  choice = 'q';
+
+  if (Serial.available() > 0){
+    Serial.print("Enter 'c' for calibrating.");
+    choice = Serial.read();
+  }
+//choice = 'c';
   if (choice == 'c')
   {
     AutoCalibrate(xRaw, yRaw, zRaw);
@@ -65,12 +79,12 @@ choice = 'c';
     Serial.print(yRaw);
     Serial.print(", ");
     Serial.print(zRaw);
-    
+      
     // Convert raw values to 'milli-Gs"
     long xScaled = map(xRaw, xRawMin, xRawMax, -1000, 1000);
     long yScaled = map(yRaw, yRawMin, yRawMax, -1000, 1000);
     long zScaled = map(zRaw, zRawMin, zRawMax, -1000, 1000);
-  
+   
     // re-scale to fractional Gs
     float xAccel = xScaled / 1000.0;
     float yAccel = yScaled / 1000.0;
@@ -83,11 +97,11 @@ choice = 'c';
     Serial.print("G, ");
     Serial.print(zAccel);
     Serial.println("G");
-  
+   
+    
+  } 
   delay(500);
-  }
 }
-
 //
 // Read "sampleSize" samples and report the average
 //
@@ -106,9 +120,10 @@ int ReadAxis(int axisPin)
 //
 // Find the extreme raw readings from each axis
 //
-void AutoCalibrate(int xRaw, int yRaw, int zRaw)
+void AutoCalibrate(double xRaw, double yRaw, double zRaw)
 {
   Serial.println("Calibrate");
+  
   if (xRaw < xRawMin)
   {
     xRawMin = xRaw;
