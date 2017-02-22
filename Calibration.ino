@@ -49,9 +49,10 @@ void loop()
   choice = 'q';
 
   if (Serial.available() > 0){
-    Serial.print("Enter 'c' for calibrating.");
+
     choice = Serial.read();
   }
+  
 //choice = 'c';
   if (choice == 'c')
   {
@@ -101,6 +102,7 @@ void loop()
     
   } 
   delay(500);
+  
 }
 //
 // Read "sampleSize" samples and report the average
