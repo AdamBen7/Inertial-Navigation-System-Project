@@ -126,10 +126,10 @@ void LinearUpdater(Quadcopter & SomeQuad) {
   double dzVel = zAccel - SomeQuad.GetGravityZ(); //zAccel
 
  
-  double pass = 1.0;
-  if(dxVel < pass && dxVel > -pass) AccelVec[0] = 0.0;
-  if(dyVel < pass && dyVel > -pass) AccelVec[1] = 0.0;
-  if(dzVel < pass && dzVel > -pass) AccelVec[2] = 0.0;
+//  double pass = 1.0;
+//  if(dxVel < pass && dxVel > -pass) AccelVec[0] = 0.0;
+//  if(dyVel < pass && dyVel > -pass) AccelVec[1] = 0.0;
+//  if(dzVel < pass && dzVel > -pass) AccelVec[2] = 0.0;
   
 
   double dxPos = SomeQuad.GetdXPos() + (dxVel * dtime);
