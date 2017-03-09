@@ -89,8 +89,8 @@ Serial.print('\n');
 void getSensor(double& ax, double& ay, double& r, double& dt){
     ax = GY85.accelerometer_x(GY85.readFromAccelerometer());
     ay = GY85.accelerometer_y(GY85.readFromAccelerometer());
-    double xScaled = map(ax, -255.62, 264.59, -1000.0, 1000.0);
-    double yScaled = map(ay, -248.07, 269.48, -1000.0, 1000.0);
+    double xScaled = map(ax, -254.27, 263.98, -1000.0, 1000.0);
+    double yScaled = map(ay, -247.57, 270.24, -1000.0, 1000.0);
     //long zScaled = map(az, -248.7, 248.56, -1000, 1000);
 
     // re-scale to m/s^2
