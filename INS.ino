@@ -259,16 +259,16 @@ void DisplayState()
     Serial.print('\t');
     Serial.print(MyQuad.GetYPos() );
     //Serial.print("\tzPos : ");
-    Serial.print('\t');
-    Serial.print(MyQuad.GetZPos() );
+    //Serial.print('\t');
+    //Serial.print(MyQuad.GetZPos() );
     //Serial.print("\tuVel : ");
 
     Serial.print('\t');
     Serial.print(MyQuad.GetdXPos() );
     Serial.print('\t');
     Serial.print(MyQuad.GetdYPos() );
-    Serial.print('\t');
-    Serial.print(MyQuad.GetdZPos() );
+    //Serial.print('\t');
+    //Serial.print(MyQuad.GetdZPos() );
 /*    Serial.print(MyQuad.GetUVel() );
     //Serial.print("\tvVel : ");
     Serial.print('\t');

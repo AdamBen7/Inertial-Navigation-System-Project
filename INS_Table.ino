@@ -3,6 +3,8 @@
 #include <Wire.h>
 #include "GY_85.h"
 
+//28cm long
+
 GY_85 GY85;
 //using namespace std;
 
@@ -152,10 +154,26 @@ void getSensor(double& ax, double& ay, double& r, double& dt){
     r = 0.0;
 }
 
+void getSensorFirst(double& ax, double& ay, double& r, double& dt){
+    ax = GY85.accelerometer_x(GY85.readFromAccelerometer());
+    ay = GY85.accelerometer_y(GY85.readFromAccelerometer());
+    double xScaled = map(ax, -254.27, 263.98, -1000.0, 1000.0); //we might want to do this again.
+    double yScaled = map(ay, -247.57, 270.24, -1000.0, 1000.0);
+    //long zScaled = map(az, -248.7, 248.56, -1000, 1000);
+
+    // re-scale to m/s^2
+    ax = xScaled * .00981;
+    ay = yScaled * .00981;
+ // double zAccel = zScaled * .00981;
+
+    //ax = 1;//ay = -0.0;//dt = 0.01;
+    r = 0.0;
+}
+
 void getSensorBias(double& baX, double& baY){
     double range = 1000.0;
   for (int i = 0; i < 1000; i++){
-    getSensor(ax,ay,r,dt);
+    getSensorFirst(ax,ay,r,dt);
     baX += ax;
     baY += ay;
 //    baZ += az; //normalizing new gravity will not result in 9.81. we'll correct that later
