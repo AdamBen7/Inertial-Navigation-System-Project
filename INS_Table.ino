@@ -54,7 +54,8 @@ void loop(){
         // 2 - plot accelerometer values
         // 3 - plot magnetometer values
         // 4 - INS Table
-        int plotOption = 4;
+        // 5 - Accel, Vel, Pos
+        int plotOption = 5;
 
         if (plotOption!=0) {
           Serial.print (currtime,3);
@@ -97,7 +98,20 @@ void loop(){
             break;  
             
             case 5:
-              Serial.print (magX);
+              Serial.print (ax);
+              Serial.print('\t');
+              Serial.print (ay);
+              Serial.print('\t');
+              Serial.println (az);
+         // Compute time derivative of states
+            getSdot(Sdot, S, ax,ay,r);
+            // Time advancement of states
+            ExplicitEuler(S,dt,Sdot);
+            //cout << time  << " ";
+            Serial.print(time,3);
+            Serial.print('\t');
+            printArray(S, 5);
+            break;  
             
           }
         }
