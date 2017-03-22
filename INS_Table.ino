@@ -102,14 +102,14 @@ void loop(){
               Serial.print('\t');
               Serial.print (ay);
               Serial.print('\t');
-              Serial.println (az);
+              //Serial.print (az);
+              //Serial.print('\t');
          // Compute time derivative of states
             getSdot(Sdot, S, ax,ay,r);
             // Time advancement of states
             ExplicitEuler(S,dt,Sdot);
             //cout << time  << " ";
-            Serial.print(time,3);
-            Serial.print('\t');
+           
             printArray(S, 5);
             break;  
             
@@ -153,7 +153,7 @@ void getSensor(double& ax, double& ay, double& r, double& dt){
 }
 
 void getSensorBias(double& baX, double& baY){
-    int range = 1000;
+    double range = 1000.0;
   for (int i = 0; i < 1000; i++){
     getSensor(ax,ay,r,dt);
     baX += ax;
