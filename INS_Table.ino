@@ -20,9 +20,9 @@ GY_85 GY85;
 
 void setup(){
   Wire.begin();
-  delay(10);
+  delay(1000);
   Serial.begin(9600);
-  delay(10);
+  delay(3000);
   GY85.init();
   getSensorBias(baX, baY);
   delay(2000);
@@ -171,9 +171,16 @@ void getSensorFirst(double& ax, double& ay, double& r, double& dt){
 }
 
 void getSensorBias(double& baX, double& baY){
-    double range = 1000.0;
-  for (int i = 0; i < 1000; i++){
+    baX = 0.0;
+    baY = 0.0;
+    double range = 10000.0;
+  for (int i = 0; i < 10000; i++){
     getSensorFirst(ax,ay,r,dt);
+    Serial.print(i);
+    Serial.print('\t');
+    Serial.print(ax);
+    Serial.print('\t');
+    Serial.println(ay);
     baX += ax;
     baY += ay;
 //    baZ += az; //normalizing new gravity will not result in 9.81. we'll correct that later
@@ -182,6 +189,10 @@ void getSensorBias(double& baX, double& baY){
   baX /= range;
   baY /= range;
   baZ /= range;  
+
+  Serial.print(baX);
+  Serial.print('\t');
+  Serial.println(baY);
 }
 
 void Multistep2ptAdams(double y[], double timestep,
