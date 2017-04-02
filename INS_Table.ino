@@ -139,15 +139,21 @@ Serial.print('\n');
 }
 //ax =1, ay = -1;
 void getSensor(double& ax, double& ay, double& r, double& dt){
-    ax = GY85.accelerometer_x(GY85.readFromAccelerometer());
-    ay = GY85.accelerometer_y(GY85.readFromAccelerometer());
-    double xScaled = map(ax, -254.27, 263.98, -1000.0, 1000.0); //we might want to do this again.
-    double yScaled = map(ay, -247.57, 270.24, -1000.0, 1000.0);
+    short shortax = GY85.accelerometer_x(GY85.readFromAccelerometer());
+    short shortay = GY85.accelerometer_y(GY85.readFromAccelerometer());
+//    double xScaled = map(ax, -254.27, 263.98, -1000.0, 1000.0); //we might want to do this again.
+//    double yScaled = map(ay, -247.57, 270.24, -1000.0, 1000.0);
+//    double xScaled = map(ax, -255.0, 255.0, -1000.0, 1000.0);
+//    double yScaled = map(ay, -255.0, 255.0, -1000.0, 1000.0);
+    double xScaled = (double) shortax;
+    double yScaled = (double) shortay;    
+    xScaled = xScaled/255.0;
+    yScaled = yScaled/255.0;
     //long zScaled = map(az, -248.7, 248.56, -1000, 1000);
 
     // re-scale to m/s^2
-    ax = xScaled * .00981 - baX;
-    ay = yScaled * .00981 - baY;
+    ax = xScaled *  9.795 - baX;
+    ay = yScaled *  9.795 - baY;
  // double zAccel = zScaled * .00981;
 
     //ax = 1;//ay = -0.0;//dt = 0.01;
@@ -155,15 +161,20 @@ void getSensor(double& ax, double& ay, double& r, double& dt){
 }
 
 void getSensorFirst(double& ax, double& ay, double& r, double& dt){
-    ax = GY85.accelerometer_x(GY85.readFromAccelerometer());
-    ay = GY85.accelerometer_y(GY85.readFromAccelerometer());
-    double xScaled = map(ax, -254.27, 263.98, -1000.0, 1000.0); //we might want to do this again.
-    double yScaled = map(ay, -247.57, 270.24, -1000.0, 1000.0);
+    short shortax = GY85.accelerometer_x(GY85.readFromAccelerometer());
+    short shortay = GY85.accelerometer_y(GY85.readFromAccelerometer());
+//    double xScaled = map(ax, -254.27, 263.98, -1000.0, 1000.0); //we might want to do this again.
+//    double yScaled = map(ay, -247.57, 270.24, -1000.0, 1000.0);
+//    double xScaled = map(ax, -255.0, 255.0, -1000.0, 1000.0);
+//    double yScaled = map(ay, -255.0, 255.0, -1000.0, 1000.0);
     //long zScaled = map(az, -248.7, 248.56, -1000, 1000);
-
+    double xScaled = (double) shortax;
+    double yScaled = (double) shortay;
+    xScaled = xScaled/255.0;
+    yScaled = yScaled/255.0;
     // re-scale to m/s^2
-    ax = xScaled * .00981;
-    ay = yScaled * .00981;
+    ax = xScaled * 9.795;
+    ay = yScaled * 9.795;
  // double zAccel = zScaled * .00981;
 
     //ax = 1;//ay = -0.0;//dt = 0.01;
