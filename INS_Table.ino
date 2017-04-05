@@ -10,7 +10,7 @@ GY_85 GY85;
 
     double S[5], Sdot[5], Sdot1[5];
     double ax, ay, az, r, dt;
-    double baX, baY, baZ; 
+    double baX, baY, baZ, ba2X, ba2Y, ba2Z; 
     double gyrX, gyrY, gyrZ;
     double magX, magY, magZ;
     double time;
@@ -24,7 +24,7 @@ void setup(){
   Serial.begin(9600);
   delay(3000);
   GY85.init();
-  getSensorBias(baX, baY);
+  getSensorBias();
   delay(2000);
 }
 
@@ -118,8 +118,12 @@ void loop(){
           }
         }
 
-        
-    }
+    if(time > 60.0)
+    {
+      while(true){}
+    }  
+  }
+
 }
 
 void zeroArray(double Vec[], size_t n){
@@ -173,11 +177,14 @@ void getSensorFirst(double& ax, double& ay, double& r, double& dt){
     r = 0.0;
 }
 
-void getSensorBias(double& baX, double& baY){
+void getSensorBias(){
     baX = 0.0;
     baY = 0.0;
-    double range = 10000.0;
-  for (int i = 0; i < 10000; i++){
+    ba2X = 0.0;
+    ba2Y = 0.0;
+    int intRange = 1000;
+    double range = (double) intRange;
+  for (int i = 0; i < intRange; i++){
     getSensorFirst(ax,ay,r,dt);
     Serial.print(i);
     Serial.print('\t');
@@ -188,11 +195,30 @@ void getSensorBias(double& baX, double& baY){
     baY += ay;
 //    baZ += az; //normalizing new gravity will not result in 9.81. we'll correct that later
   }
-    
   baX /= range;
   baY /= range;
   baZ /= range;  
 
+  for (int j = 0; j < 14; j++)
+  {
+    for (int i = 0; i < intRange; i++){
+      getSensor(ax,ay,r,dt);
+      Serial.print(i);
+      Serial.print('\t');
+      Serial.print(ax);
+      Serial.print('\t');
+      Serial.println(ay);
+      ba2X += ax;
+      ba2Y += ay;
+    }
+    ba2X /= range;
+    ba2Y /= range;
+    baX += ba2X;
+    baY += ba2Y;
+    ba2X = 0.0;
+    ba2Y = 0.0;
+  }
+  
   Serial.print(baX);
   Serial.print('\t');
   Serial.println(baY);
