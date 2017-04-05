@@ -16,7 +16,7 @@ GY_85 GY85;
     double time;
     double prevtime;
     double currtime;
-    
+    double g = 9.795;
 
 void setup(){
   Wire.begin();
@@ -60,7 +60,7 @@ void loop(){
         int plotOption = 5;
 
         if (plotOption!=0) {
-          Serial.print (currtime,3);
+          Serial.print (time,3);
           Serial.print('\t');
           switch(plotOption) {
             
@@ -142,19 +142,15 @@ void getSensor(double& ax, double& ay, double& r, double& dt){
     short shortax = GY85.accelerometer_x(GY85.readFromAccelerometer());
     short shortay = GY85.accelerometer_y(GY85.readFromAccelerometer());
  
-    double xScaled = (double) map(shortax, -254.27, 263.7, -1000, 1000); //we might want to do this again.
+    double xScaled = (double) map(shortax, -254.27, 263.7, -1000, 1000);
     double yScaled = (double) map(shortay, -248.62, 270.05, -1000, 1000);
-//    double xScaled = map(ax, -255.0, 255.0, -1000.0, 1000.0);
-//    double yScaled = map(ay, -255.0, 255.0, -1000.0, 1000.0);  
 
-    
-    xScaled = xScaled/1000.0;
-    yScaled = yScaled/1000.0;
     //long zScaled = map(az, -248.7, 248.56, -1000, 1000);
 
     // re-scale to m/s^2
-    ax = xScaled *  9.795 - baX;
-    ay = yScaled *  9.795 - baY;
+    ax = (xScaled *  g/1000.0) - baX;
+    ay = (yScaled *  g/1000.0) - baY;
+    
  // double zAccel = zScaled * .00981;
 
     //ax = 1;//ay = -0.0;//dt = 0.01;
@@ -165,17 +161,12 @@ void getSensorFirst(double& ax, double& ay, double& r, double& dt){
     short shortax = GY85.accelerometer_x(GY85.readFromAccelerometer());
     short shortay = GY85.accelerometer_y(GY85.readFromAccelerometer());
 
-
-    double xScaled = (double) map(shortax, -254.27, 263.7, -1000, 1000); //we might want to do this again.
+    double xScaled = (double) map(shortax, -254.27, 263.7, -1000, 1000);
     double yScaled = (double) map(shortay, -248.62, 270.05, -1000, 1000);
-//    double xScaled = map(ax, -255.0, 255.0, -1000.0, 1000.0);
-//    double yScaled = map(ay, -255.0, 255.0, -1000.0, 1000.0);
     //long zScaled = map(az, -248.7, 248.56, -1000, 1000);
-    xScaled = xScaled/1000.0;
-    yScaled = yScaled/1000.0;
     // re-scale to m/s^2
-    ax = xScaled * 9.795;
-    ay = yScaled * 9.795;
+    ax = xScaled * g/1000.0;
+    ay = yScaled * g/1000.0;
  // double zAccel = zScaled * .00981;
 
     //ax = 1;//ay = -0.0;//dt = 0.01;
@@ -206,6 +197,52 @@ void getSensorBias(double& baX, double& baY){
   Serial.print('\t');
   Serial.println(baY);
 }
+/* //This didn't improve anything... thought it was a good idea to get 9.81 as reading when accelerometer pointed at ground.
+void getSensor(double& ax, double& ay, double& r, double& dt){
+    short shortax = GY85.accelerometer_x(GY85.readFromAccelerometer());
+    short shortay = GY85.accelerometer_y(GY85.readFromAccelerometer());
+ 
+    double xScaled = (double) map(shortax, -254.27, 263.7, -1000, 1000); //we might want to do this again.
+    double yScaled = (double) map(shortay, -248.62, 270.05, -1000, 1000);
+
+    xScaled = xScaled;
+    yScaled = yScaled;
+    //long zScaled = map(az, -248.7, 248.56, -1000, 1000);
+
+    // re-scale to m/s^2
+    ax = xScaled *  g - baX;
+    ay = yScaled *  g - baY;
+
+    ax = map(ax, -(1000*g + baX), (1000*g + baX), -1000*g, 1000*g);
+    ay = map(ay, -(1000*g + baY), (1000*g + baY), -1000*g, 1000*g);
+
+    ax /= 1000;
+    ay /= 1000;
+ // double zAccel = zScaled * .00981;
+
+    //ax = 1;//ay = -0.0;//dt = 0.01;
+    r = 0.0;
+}
+
+void getSensorFirst(double& ax, double& ay, double& r, double& dt){
+    short shortax = GY85.accelerometer_x(GY85.readFromAccelerometer());
+    short shortay = GY85.accelerometer_y(GY85.readFromAccelerometer());
+
+    double xScaled = (double) map(shortax, -254.27, 263.7, -1000, 1000); //we might want to do this again.
+    double yScaled = (double) map(shortay, -248.62, 270.05, -1000, 1000);
+    //long zScaled = map(az, -248.7, 248.56, -1000, 1000);
+    xScaled = xScaled;
+    yScaled = yScaled;
+    // re-scale to m/s^2
+    ax = xScaled * g;
+    ay = yScaled * g;
+ // double zAccel = zScaled * .00981;
+
+    //ax = 1;//ay = -0.0;//dt = 0.01;
+    r = 0.0;
+}*/
+
+
 
 void Multistep2ptAdams(double y[], double timestep,
                        double ydot[], double ydotold[]){
