@@ -35,7 +35,7 @@ void setup(){
   p.AddTimeGraph("Velocity vs Time", 15000, "u", S[2], "v", S[3] );
   p.AddTimeGraph("Position vs Time", 15000, "x", S[0], "y", S[1] );
   p.AddTimeGraph("Anglular Velocity vs Time", 15000, "r", Sdot[4] );  
-  p.AddTimeGraph("Angle vs Time", 15000, "theta", S[4] );  
+  p.AddTimeGraph("Angle vs Time", 15000, "psi", S[4] );  
 
 }
 
