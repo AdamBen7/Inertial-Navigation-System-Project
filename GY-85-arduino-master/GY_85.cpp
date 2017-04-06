@@ -118,7 +118,7 @@ void GY_85::GyroCalibrate()
     g_offy = 0;
     g_offz = 0;
     
-    for( uint8_t i = 0; i < 10; i ++ ) //take the mean from 10 gyro probes and divide it from the current probe
+    for( uint8_t i = 0; i < 100; i ++ ) //take the mean from 10 gyro probes and divide it from the current probe
     {
         delay(10);
         float* gp = readGyro();
@@ -126,9 +126,9 @@ void GY_85::GyroCalibrate()
         tmpy += *(++gp);
         tmpz += *(++gp);
     }
-    g_offx = tmpx/10;
-    g_offy = tmpy/10;
-    g_offz = tmpz/10;
+    g_offx = tmpx/100;
+    g_offy = tmpy/100;
+    g_offz = tmpz/100;
 }
 
 float* GY_85::readGyro()

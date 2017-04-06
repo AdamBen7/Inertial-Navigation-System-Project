@@ -34,6 +34,9 @@ void setup(){
   p.AddTimeGraph("Accel vs Time", 15000, "ax", ax, "ay", ay );
   p.AddTimeGraph("Velocity vs Time", 15000, "u", S[2], "v", S[3] );
   p.AddTimeGraph("Position vs Time", 15000, "x", S[0], "y", S[1] );
+  p.AddTimeGraph("Anglular Velocity vs Time", 15000, "r", Sdot[4] );  
+  p.AddTimeGraph("Angle vs Time", 15000, "theta", S[4] );  
+
 }
 
 void loop(){
@@ -161,7 +164,7 @@ void getSensor(double& ax, double& ay, double& r, double& dt){
  // double zAccel = zScaled * .00981;
 
     //ax = 1;//ay = -0.0;//dt = 0.01;
-    r = 0.0;
+    r = GY85.gyro_z( GY85.readGyro() );
 }
 
 void getSensorFirst(double& ax, double& ay, double& r, double& dt){

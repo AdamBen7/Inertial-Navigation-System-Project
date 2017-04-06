@@ -44,9 +44,11 @@ public:
     
     //-----------------------------------
     
-    inline float gyro_x( float* a ){ return *(   a ) / 14.375; }
-    inline float gyro_y( float* a ){ return *( 1+a ) / 14.375; }
-    inline float gyro_z( float* a ){ return *( 2+a ) / 14.375; }
+    //Divide by 14.375 to get degrees/sec
+    //Divide by 823.62683050057 to get rad/sec
+    inline float gyro_x( float* a ){ return *(   a ) / 823.62683050057; }
+    inline float gyro_y( float* a ){ return *( 1+a ) / 823.62683050057; }
+    inline float gyro_z( float* a ){ return *( 2+a ) / 823.62683050057; }
     inline float temp  ( float* a ){ return  35+( *( 3+a )+13200 ) / 280; }
 };
 
