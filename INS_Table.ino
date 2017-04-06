@@ -2,11 +2,10 @@
 #include <cmath>
 #include <Wire.h>
 #include "GY_85.h"
-
-//28cm long
+#include "Plotter.h"
 
 GY_85 GY85;
-//using namespace std;
+Plotter p;
 
     double S[5], Sdot[5], Sdot1[5];
     double ax, ay, az, r, dt;
@@ -17,15 +16,23 @@ GY_85 GY85;
     double prevtime;
     double currtime;
     double g = 9.795;
+    double xxx;
+            
+    int plotOption = 6;
 
 void setup(){
   Wire.begin();
   delay(1000);
   Serial.begin(9600);
-  delay(3000);
+  delay(1000);
   GY85.init();
-  getSensorBias();
-  delay(2000);
+  //getSensorBias();
+  delay(1000);
+ //   p = Plotter(); //create plotter //evil line
+  p.AddXYGraph("Acceleration in X vs Custom Time", 1000000, "Time", time, "X-Acceleration", ax); 
+//  p.AddTimeGraph("Accel in X vs Time", 15000, "ax", ax, "ay", ay, "u", S[2], "v",S[3]);
+// p.AddTimeGraph("Accel in X vs Time", 15000, "ax", ax);
+//p.AddTimeGraph("Accel in X vs Time", 15000, "ay", ay);
 }
 
 void loop(){
@@ -43,12 +50,16 @@ void loop(){
     while(true){
         // Read sensor data
         getSensor(ax,ay,r,dt); //work on efficiency since dt is unecessarily set to 0.1 everytime!
-
+        xxx = 10*sin( 2.0*PI*( millis() / 5000.0 ) ); // update your variables like usual
         // Advance time
         prevtime = currtime;
         currtime = millis()/1000.0;
         dt = currtime - prevtime;
         time = time + dt;
+        // Compute time derivative of states
+        getSdot(Sdot, S, ax,ay,r);
+        // Time advancement of states
+        ExplicitEuler(S,dt,Sdot);           
 
         // this is for debugging on your serial plotter (turn off if not needed)
         // 0 - skip 
@@ -57,11 +68,10 @@ void loop(){
         // 3 - plot magnetometer values
         // 4 - INS Table
         // 5 - Accel, Vel, Pos
-        int plotOption = 5;
-
+        
         if (plotOption!=0) {
-          Serial.print (time,3);
-          Serial.print('\t');
+          //Serial.print (time,3);
+          //Serial.print('\t');
           switch(plotOption) {
             
             case 1:
@@ -89,10 +99,6 @@ void loop(){
               break;
 
             case 4:        
-            // Compute time derivative of states
-            getSdot(Sdot, S, ax,ay,r);
-            // Time advancement of states
-            ExplicitEuler(S,dt,Sdot);
             //cout << time  << " ";
             Serial.print(time,3);
             Serial.print('\t');
@@ -106,22 +112,19 @@ void loop(){
               Serial.print('\t');
               //Serial.print (az);
               //Serial.print('\t');
-         // Compute time derivative of states
-            getSdot(Sdot, S, ax,ay,r);
-            // Time advancement of states
-            ExplicitEuler(S,dt,Sdot);
-            //cout << time  << " ";
-           
             printArray(S, 5);
             break;  
-            
+
+            case 6:
+              p.Plot();
+            break;
           }
         }
-
+/*
     if(time > 60.0)
     {
       while(true){}
-    }  
+    }  */
   }
 
 }
