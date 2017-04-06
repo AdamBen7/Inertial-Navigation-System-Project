@@ -6,6 +6,7 @@
 
 GY_85 GY85;
 Plotter p;
+Plotter q;
 
     double S[5], Sdot[5], Sdot1[5];
     double ax, ay, az, r, dt;
@@ -16,8 +17,7 @@ Plotter p;
     double prevtime;
     double currtime;
     double g = 9.795;
-    double xxx;
-            
+    
     int plotOption = 6;
 
 void setup(){
@@ -26,13 +26,14 @@ void setup(){
   Serial.begin(9600);
   delay(1000);
   GY85.init();
-  //getSensorBias();
+  q.AddTimeGraph("Raw Acceleration X", 15000, "ax", ax);
+  q.AddTimeGraph("Raw Acceleration Y", 15000, "ay", ay);
+  getSensorBias();
   delay(1000);
- //   p = Plotter(); //create plotter //evil line
-  p.AddXYGraph("Acceleration in X vs Custom Time", 1000000, "Time", time, "X-Acceleration", ax); 
-//  p.AddTimeGraph("Accel in X vs Time", 15000, "ax", ax, "ay", ay, "u", S[2], "v",S[3]);
-// p.AddTimeGraph("Accel in X vs Time", 15000, "ax", ax);
-//p.AddTimeGraph("Accel in X vs Time", 15000, "ay", ay);
+//  p.AddXYGraph("Acceleration in X vs Custom Time", 1000000, "Time", time, "X-Acceleration"); 
+  p.AddTimeGraph("Accel vs Time", 15000, "ax", ax, "ay", ay );
+  p.AddTimeGraph("Velocity vs Time", 15000, "u", S[2], "v", S[3] );
+  p.AddTimeGraph("Position vs Time", 15000, "x", S[0], "y", S[1] );
 }
 
 void loop(){
@@ -50,7 +51,6 @@ void loop(){
     while(true){
         // Read sensor data
         getSensor(ax,ay,r,dt); //work on efficiency since dt is unecessarily set to 0.1 everytime!
-        xxx = 10*sin( 2.0*PI*( millis() / 5000.0 ) ); // update your variables like usual
         // Advance time
         prevtime = currtime;
         currtime = millis()/1000.0;
@@ -185,15 +185,19 @@ void getSensorBias(){
     baY = 0.0;
     ba2X = 0.0;
     ba2Y = 0.0;
-    int intRange = 1000;
+    int intRange = 2000;
     double range = (double) intRange;
   for (int i = 0; i < intRange; i++){
     getSensorFirst(ax,ay,r,dt);
+    if (plotOption == 6){
+      q.Plot();
+    } else{
     Serial.print(i);
     Serial.print('\t');
     Serial.print(ax);
     Serial.print('\t');
     Serial.println(ay);
+    }
     baX += ax;
     baY += ay;
 //    baZ += az; //normalizing new gravity will not result in 9.81. we'll correct that later
@@ -202,15 +206,19 @@ void getSensorBias(){
   baY /= range;
   baZ /= range;  
 
-  for (int j = 0; j < 14; j++)
+  for (int j = 0; j < 9; j++)
   {
     for (int i = 0; i < intRange; i++){
       getSensor(ax,ay,r,dt);
+      if (plotOption == 6){
+        q.Plot();
+      } else{
       Serial.print(i);
       Serial.print('\t');
       Serial.print(ax);
       Serial.print('\t');
       Serial.println(ay);
+      }
       ba2X += ax;
       ba2Y += ay;
     }
