@@ -3,6 +3,7 @@
 #include <Wire.h>
 #include "GY_85.h"
 #include "Plotter.h"
+#include "Eigen30.h"
 
 GY_85 GY85;
 Plotter p;
@@ -11,6 +12,8 @@ Plotter q;
     double S[5], Sdot[5], Sdot1[5];
     double ax, ay, az, r, dt;
     double baX, baY, baZ, ba2X, ba2Y, ba2Z; 
+    double maxaX, minaX, maxaY, minaY;
+    double ux, uy;
     double gyrX, gyrY, gyrZ;
     double magX, magY, magZ;
     double time;
@@ -18,7 +21,7 @@ Plotter q;
     double currtime;
     double g = 9.795;
     
-    int plotOption = 6;
+    int plotOption = 5;
 
 void setup(){
   Wire.begin();
@@ -36,7 +39,6 @@ void setup(){
   p.AddTimeGraph("Position vs Time", 15000, "x", S[0], "y", S[1] );
   p.AddTimeGraph("Anglular Velocity vs Time", 15000, "r", Sdot[4] );  
   p.AddTimeGraph("Angle vs Time", 15000, "psi", S[4] );  
-
 }
 
 void loop(){
@@ -52,12 +54,17 @@ void loop(){
     currtime = millis()/1000.0; 
 
     while(true){
+      //Serial.println("Top of loop...");
+      while(millis() % 4 != 0){}
         // Read sensor data
         getSensor(ax,ay,r,dt); //work on efficiency since dt is unecessarily set to 0.1 everytime!
         // Advance time
+        /*
         prevtime = currtime;
         currtime = millis()/1000.0;
         dt = currtime - prevtime;
+        */
+        dt = .004;
         time = time + dt;
         // Compute time derivative of states
         getSdot(Sdot, S, ax,ay,r);
@@ -109,6 +116,10 @@ void loop(){
             break;  
             
             case 5:
+              Serial.print(millis());
+              Serial.print('\t');
+              Serial.print(time,3);
+              Serial.print('\t');
               Serial.print (ax);
               Serial.print('\t');
               Serial.print (ay);
@@ -209,7 +220,7 @@ void getSensorBias(){
   baY /= range;
   baZ /= range;  
 
-  for (int j = 0; j < 9; j++)
+  for (int j = 0; j < 4; j++)
   {
     for (int i = 0; i < intRange; i++){
       getSensor(ax,ay,r,dt);
@@ -232,10 +243,52 @@ void getSensorBias(){
     ba2X = 0.0;
     ba2Y = 0.0;
   }
-  
+
+  maxaX = 0.0;
+  minaX = 0.0;
+  maxaY = 0.0;
+  minaY = 0.0;
+
+  for (int i = 0; i < intRange; i++)
+  {
+    getSensor(ax,ay,r,dt);
+    if(ax > maxaX)
+    {
+      maxaX = ax;
+    }
+    if(ax < minaX)
+    {
+      minaX = ax;
+    }
+    if(ay > maxaY)
+    {
+      maxaY = ay;
+    }
+    if(ay < minaY)
+    {
+      minaY = ay;
+    }
+  }
+
+  Serial.print(maxaX);
+  Serial.print('\t');
+  Serial.print(minaX);
+  Serial.print('\t');
+  Serial.print(maxaY);
+  Serial.print('\t');
+  Serial.println(minaY);
+
+  ux = (maxaX > -minaX) ? (maxaX) : (-minaX);
+  uy = (maxaY > -minaY) ? (maxaY) : (-minaY);
+
+  Serial.print(ux);
+  Serial.print('\t');
+  Serial.print(uy);
+  Serial.print('\t');
   Serial.print(baX);
   Serial.print('\t');
   Serial.println(baY);
+
 }
 /* //This didn't improve anything... thought it was a good idea to get 9.81 as reading when accelerometer pointed at ground.
 void getSensor(double& ax, double& ay, double& r, double& dt){
