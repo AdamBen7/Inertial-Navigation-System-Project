@@ -43,7 +43,7 @@ class Quadcopter
 	void SetGravityY(double gaY) { _gaY = gaY;}
 	void SetGravityZ(double gaZ) { _gaZ = gaZ;}
 
-
+/*
     double GetXAccel() {return _xAccel;}
     double GetYAccel() {return _yAccel;}
     double GetZAccel() {return _zAccel;}
@@ -51,7 +51,7 @@ class Quadcopter
     void SetXAccel(double xAccel) {_xAccel = xAccel;}
     void SetYAccel(double yAccel) {_yAccel = yAccel;}
     void SetZAccel(double zAccel) {_zAccel = zAccel;}
-
+*/
     double GetUVel() {return _uVel;}
     double GetVVel() {return _vVel;}
     double GetWVel() {return _wVel;}
@@ -114,12 +114,12 @@ class Quadcopter
     double _pAngV;
     double _qAngV;
     double _rAngV;
-
+/*
 // Linear Accel     |Body  |raw
     double _xAccel;
     double _yAccel;
     double _zAccel;
-
+*/
 // Position         |Global|from linear vel
     double _xPos;
     double _yPos;
