@@ -5,3 +5,4 @@ cp -a ../Arduino/Calibration/* .
 cp -a ../Arduino/EigenTest/* .
 cp -a ../Arduino/libraries/GY-85-arduino-master .
 cp -a ../Arduino/libraries/QuadcopterLib .
+cp -a ../Arduino/libraries/Kalman .

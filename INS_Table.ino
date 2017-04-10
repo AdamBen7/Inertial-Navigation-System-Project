@@ -4,36 +4,40 @@
 #include "GY_85.h"
 #include "Plotter.h"
 #include "Eigen30.h"
-
+#include <Eigen/LU>
+#include "Kalman.h"
 
 GY_85 GY85;
 Plotter p;
 Plotter q;
 
+    VectorXd TheState(6);
+
     double S[5], Sdot[5], Sdot1[5];
-    double ax, ay, az, r, dt;
+    double ax, ay, az, r, dt=0.004;
     double baX, baY, baZ, ba2X, ba2Y, ba2Z; 
     double maxaX, minaX, maxaY, minaY;
     double ux, uy;
+    double epsilon = 2.0;
     double gyrX, gyrY, gyrZ;
     double magX, magY, magZ;
     double time;
     double prevtime;
     double currtime;
     double g = 9.795;
-    
-    int plotOption = 5;
+
+    int plotOption = 7;
 
 void setup(){
   Wire.begin();
-  delay(1000);
+  delay(500);
   Serial.begin(9600);
-  delay(1000);
+  delay(500);
   GY85.init();
   q.AddTimeGraph("Raw Acceleration X", 15000, "ax", ax);
   q.AddTimeGraph("Raw Acceleration Y", 15000, "ay", ay);
   getSensorBias();
-  delay(1000);
+  delay(500);
 //  p.AddXYGraph("Acceleration in X vs Custom Time", 1000000, "Time", time, "X-Acceleration"); 
   p.AddTimeGraph("Accel vs Time", 15000, "ax", ax, "ay", ay );
   p.AddTimeGraph("Velocity vs Time", 15000, "u", S[2], "v", S[3] );
@@ -53,19 +57,21 @@ void loop(){
     getSdot(Sdot1, S, ax,ay,r);
 
     currtime = millis()/1000.0; 
+    Kalman Filter(dt, epsilon, ux, uy); //think of somthing better for object name
 
     while(true){
       //Serial.println("Top of loop...");
       while(millis() % 4 != 0){}
         // Read sensor data
         getSensor(ax,ay,r,dt); //work on efficiency since dt is unecessarily set to 0.1 everytime!
+        Filter.SetStateVecZ(ax, ay); 
         // Advance time
         /*
         prevtime = currtime;
         currtime = millis()/1000.0;
         dt = currtime - prevtime;
         */
-        dt = .004;
+
         time = time + dt;
         // Compute time derivative of states
         getSdot(Sdot, S, ax,ay,r);
@@ -79,6 +85,8 @@ void loop(){
         // 3 - plot magnetometer values
         // 4 - INS Table
         // 5 - Accel, Vel, Pos
+
+        TheState = Filter.KFilter();
         
         if (plotOption!=0) {
           //Serial.print (time,3);
@@ -133,6 +141,10 @@ void loop(){
             case 6:
               p.Plot();
             break;
+
+            case 7:
+              printArray(TheState);
+            break;
           }
         }
 /*
@@ -144,10 +156,37 @@ void loop(){
 
 }
 
+
+
+
 void zeroArray(double Vec[], size_t n){
     for(size_t i=0; i<n; i++){
         Vec[i] = 0.0;
     }
+}
+
+
+
+//Polymorphic Printing! Woohoo!
+void printArray(Eigen::MatrixXd Mat){
+  for(size_t i=0; i<Mat.rows(); i++){
+    for (size_t j=0; j<Mat.cols(); j++){
+      Serial.print(Mat(i,j));
+      Serial.print('\t');
+      }
+    Serial.print('\n');
+    } 
+Serial.print('\n');
+}
+
+void printArray(Eigen::VectorXd Vec){
+
+  for (size_t j=0; j<(Vec.size()); j++){
+    Serial.print(Vec(j));
+    Serial.print('\t');
+    Serial.print('\n');
+    } 
+Serial.print('\n');
 }
 
 void printArray(double Vec[], size_t n){
@@ -200,7 +239,7 @@ void getSensorBias(){
     baY = 0.0;
     ba2X = 0.0;
     ba2Y = 0.0;
-    int intRange = 2000;
+    int intRange = 1000;
     double range = (double) intRange;
   for (int i = 0; i < intRange; i++){
     getSensorFirst(ax,ay,r,dt);
@@ -221,7 +260,7 @@ void getSensorBias(){
   baY /= range;
   baZ /= range;  
 
-  for (int j = 0; j < 4; j++)
+  for (int j = 0; j < 1; j++)
   {
     for (int i = 0; i < intRange; i++){
       getSensor(ax,ay,r,dt);
