@@ -19,21 +19,25 @@ class Kalman
 	MatrixXd GetMatA() {return _MatA;}
 	MatrixXd GetMatB() {return _MatB;}
 	MatrixXd GetMatH() {return _MatH;}
+	MatrixXd GetMatI() {return _MatI;}
 	MatrixXd GetMatP() {return _MatP;}
 	MatrixXd GetMatQ() {return _MatQ;}
 	MatrixXd GetMatR() {return _MatR;}
 	MatrixXd GetKalmanG() {return _KalmanG;}
 	MatrixXd GetMatAnnoying() {return _MatAnnoying;}
-
-	void SetStateVecZ(double ax, double ay);
-	
+	MatrixXd GetMatAdam() { return _MatAdam;}
+	void UpdateState(double dt, double ax, double ay);
+	VectorXd NoFilter(double dt, double ax, double ay); // #noFilter!<3
 
 	VectorXd KFilter(); //maybe pass in StateVecZ
+	MatrixXd Debugger();
 
 
-	
   private:
-		
+	double _epsilon;
+	double _ux;
+	double _uy;
+	
 /*	
 	VectorXd _StateVecX(6);
 	VectorXd _StateVecZ(6);
@@ -53,9 +57,11 @@ class Kalman
 	MatrixXd _MatA;
 	MatrixXd _MatB;
 	MatrixXd _MatH;
+	MatrixXd _MatI;
 	MatrixXd _MatP;
 	MatrixXd _MatQ;
 	MatrixXd _MatR;
 	MatrixXd _KalmanG; //kalman gain
 	MatrixXd _MatAnnoying;
+	MatrixXd _MatAdam;
 };

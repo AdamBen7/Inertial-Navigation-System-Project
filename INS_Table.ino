@@ -12,9 +12,9 @@ Plotter p;
 Plotter q;
 
     VectorXd TheState(6);
+    MatrixXd Debugger(6,6);
 
-    double S[5], Sdot[5], Sdot1[5];
-    double ax, ay, az, r, dt=0.004;
+    double ax, ay, az, r, dt=0.004; //0.004 changed since didn't look right
     double baX, baY, baZ, ba2X, ba2Y, ba2Z; 
     double maxaX, minaX, maxaY, minaY;
     double ux, uy;
@@ -26,11 +26,11 @@ Plotter q;
     double currtime;
     double g = 9.795;
 
-    int plotOption = 7;
+    int serialOption = 7;
 
 void setup(){
   Wire.begin();
-  delay(500);
+  delay(200);
   Serial.begin(9600);
   delay(500);
   GY85.init();
@@ -38,117 +38,83 @@ void setup(){
   q.AddTimeGraph("Raw Acceleration Y", 15000, "ay", ay);
   getSensorBias();
   delay(500);
-//  p.AddXYGraph("Acceleration in X vs Custom Time", 1000000, "Time", time, "X-Acceleration"); 
-  p.AddTimeGraph("Accel vs Time", 15000, "ax", ax, "ay", ay );
-  p.AddTimeGraph("Velocity vs Time", 15000, "u", S[2], "v", S[3] );
-  p.AddTimeGraph("Position vs Time", 15000, "x", S[0], "y", S[1] );
-  p.AddTimeGraph("Anglular Velocity vs Time", 15000, "r", Sdot[4] );  
-  p.AddTimeGraph("Angle vs Time", 15000, "psi", S[4] );  
+//  p.AddXYGraph("Acceleration in X vs Custom Time", 1000000, "Time", time, "X-Acceleration");  //keep commented out
+  p.AddTimeGraph("Accel vs Time", 2000, "ax", TheState(4), "ay", TheState(5));
+  p.AddTimeGraph("Velocity vs Time", 2000, "u", TheState[2], "v", TheState[3] );
+  p.AddTimeGraph("Position vs Time", 2000, "x", TheState[0], "y", TheState[1] );
+//  p.AddTimeGraph("Anglular Velocity vs Time", 15000, "r", Sdot[4] );  
+//  p.AddTimeGraph("Angle vs Time", 15000, "psi", S[4] ); 
 }
 
 void loop(){
-    zeroArray(S, 5);
-    zeroArray(Sdot, 5);
-    zeroArray(Sdot1, 5);
-
     //Init time
     time =0.0;
     getSensor(ax,ay,r,dt);
-    getSdot(Sdot1, S, ax,ay,r);
-
     currtime = millis()/1000.0; 
     Kalman Filter(dt, epsilon, ux, uy); //think of somthing better for object name
-
     while(true){
-      //Serial.println("Top of loop...");
-      while(millis() % 4 != 0){}
-        // Read sensor data
-        getSensor(ax,ay,r,dt); //work on efficiency since dt is unecessarily set to 0.1 everytime!
-        Filter.SetStateVecZ(ax, ay); 
-        // Advance time
-        /*
-        prevtime = currtime;
-        currtime = millis()/1000.0;
-        dt = currtime - prevtime;
-        */
-
-        time = time + dt;
-        // Compute time derivative of states
-        getSdot(Sdot, S, ax,ay,r);
-        // Time advancement of states
-        ExplicitEuler(S,dt,Sdot);           
-
-        // this is for debugging on your serial plotter (turn off if not needed)
-        // 0 - skip 
-        // 1 - plot gyro values
-        // 2 - plot accelerometer values
-        // 3 - plot magnetometer values
-        // 4 - INS Table
-        // 5 - Accel, Vel, Pos
-
-        TheState = Filter.KFilter();
-        
-        if (plotOption!=0) {
-          //Serial.print (time,3);
-          //Serial.print('\t');
-          switch(plotOption) {
+      getSensor(ax,ay,r,dt);
+      prevtime = currtime;
+      currtime = millis()/1000.0;
+      dt = currtime - prevtime;
+      // Advance time
+      time = time + dt;      
+      Filter.UpdateState(dt, ax, ay); 
+      TheState = Filter.KFilter();
+      TheState = Filter.NoFilter(dt, ax, ay); //used when we want to compare... comment out above.
+      //Debugger = Filter.Debugger();
+      // Compute time derivative of states
+      // Time advancement of states        
+      // this is for debugging on your serial plotter (turn off if not needed)
+      // 0 - skip 
+      // 1 - plot gyro values
+      // 2 - plot accelerometer values
+      // 3 - plot magnetometer values
+      // 4 - INS Table
+      // 5 - Accel, Vel, Pos
+      if (serialOption!=0) {
+        //Serial.print (time,3);
+        //Serial.print('\t');
+        switch(serialOption) {
             
-            case 1:
-              Serial.print (gyrX);
-              Serial.print('\t');
-              Serial.print (gyrY);
-              Serial.print('\t');
-              Serial.println (gyrZ);  
-              break;
+          case 1:
+            Serial.print (gyrX);
+            Serial.print('\t');
+            Serial.print (gyrY);
+            Serial.print('\t');
+            Serial.println (gyrZ);  
+            break;
 
-            case 2:
-              Serial.print (ax);
-              Serial.print('\t');
-              Serial.print (ay);
-              Serial.print('\t');
-              Serial.println (az);
-              break;
+          case 2:
+            Serial.print (ax);
+            Serial.print('\t');
+            Serial.print (ay);
+            Serial.print('\t');
+            Serial.println (az);
+            break;
               
-            case 3:
-              Serial.print (magX);
-              Serial.print('\t');
-              Serial.print (magY);
-              Serial.print('\t');
-              Serial.println (magZ);
-              break;
+          case 3:
+            Serial.print (magX);
+            Serial.print('\t');
+            Serial.print (magY);
+            Serial.print('\t');
+            Serial.println (magZ);
+            break;  
 
-            case 4:        
-            //cout << time  << " ";
+          case 6:
+            p.Plot();
+          break;
+
+          case 7:
             Serial.print(time,3);
             Serial.print('\t');
-            printArray(S, 5);
-            break;  
-            
-            case 5:
-              Serial.print(millis());
-              Serial.print('\t');
-              Serial.print(time,3);
-              Serial.print('\t');
-              Serial.print (ax);
-              Serial.print('\t');
-              Serial.print (ay);
-              Serial.print('\t');
-              //Serial.print (az);
-              //Serial.print('\t');
-            printArray(S, 5);
-            break;  
-
-            case 6:
-              p.Plot();
-            break;
-
-            case 7:
-              printArray(TheState);
-            break;
-          }
+            printPrettyArray(TheState);
+            //printArray(Debugger);
+          break;
         }
-/*
-    if(time > 60.0)
+      }
+
+    /*if(time > 60.0)
     {
       while(true){}
     }  */
@@ -156,22 +122,11 @@ void loop(){
 
 }
 
-
-
-
-void zeroArray(double Vec[], size_t n){
-    for(size_t i=0; i<n; i++){
-        Vec[i] = 0.0;
-    }
-}
-
-
-
 //Polymorphic Printing! Woohoo!
 void printArray(Eigen::MatrixXd Mat){
   for(size_t i=0; i<Mat.rows(); i++){
     for (size_t j=0; j<Mat.cols(); j++){
-      Serial.print(Mat(i,j));
+      Serial.print(Mat(i,j),3);
       Serial.print('\t');
       }
     Serial.print('\n');
@@ -182,7 +137,7 @@ Serial.print('\n');
 void printArray(Eigen::VectorXd Vec){
 
   for (size_t j=0; j<(Vec.size()); j++){
-    Serial.print(Vec(j));
+    Serial.print(Vec(j),3);
     Serial.print('\t');
     Serial.print('\n');
     } 
@@ -192,12 +147,24 @@ Serial.print('\n');
 void printArray(double Vec[], size_t n){
     for(size_t i=0; i<n; i++){
 //        cout << Vec[i] << " ";
-    Serial.print(Vec[i]);
+    Serial.print(Vec[i],3);
     Serial.print('\t');
     }
 Serial.print('\n');
 //    cout << endl;
 }
+
+void printPrettyArray(Eigen::VectorXd Vec){
+
+  for (size_t j=0; j<(Vec.size()); j++){
+    Serial.print(Vec(j),3);
+    Serial.print('\t');
+    //Serial.print('\n'); //just because it displays nicely
+    } 
+Serial.print('\n');
+}
+
+
 //ax =1, ay = -1;
 void getSensor(double& ax, double& ay, double& r, double& dt){
     short shortax = GY85.accelerometer_x(GY85.readFromAccelerometer());
@@ -239,11 +206,11 @@ void getSensorBias(){
     baY = 0.0;
     ba2X = 0.0;
     ba2Y = 0.0;
-    int intRange = 1000;
+    int intRange = 300;
     double range = (double) intRange;
   for (int i = 0; i < intRange; i++){
     getSensorFirst(ax,ay,r,dt);
-    if (plotOption == 6){
+    if (serialOption == 6){
       q.Plot();
     } else{
     Serial.print(i);
@@ -260,11 +227,11 @@ void getSensorBias(){
   baY /= range;
   baZ /= range;  
 
-  for (int j = 0; j < 1; j++)
+  for (int j = 0; j < 3; j++)
   {
     for (int i = 0; i < intRange; i++){
       getSensor(ax,ay,r,dt);
-      if (plotOption == 6){
+      if (serialOption == 6){
         q.Plot();
       } else{
       Serial.print(i);
@@ -316,6 +283,7 @@ void getSensorBias(){
   Serial.print('\t');
   Serial.print(maxaY);
   Serial.print('\t');
+    Serial.println(ay);
   Serial.println(minaY);
 
   ux = (maxaX > -minaX) ? (maxaX) : (-minaX);
@@ -329,79 +297,4 @@ void getSensorBias(){
   Serial.print('\t');
   Serial.println(baY);
 
-}
-/* //This didn't improve anything... thought it was a good idea to get 9.81 as reading when accelerometer pointed at ground.
-void getSensor(double& ax, double& ay, double& r, double& dt){
-    short shortax = GY85.accelerometer_x(GY85.readFromAccelerometer());
-    short shortay = GY85.accelerometer_y(GY85.readFromAccelerometer());
- 
-    double xScaled = (double) map(shortax, -254.27, 263.7, -1000, 1000); //we might want to do this again.
-    double yScaled = (double) map(shortay, -248.62, 270.05, -1000, 1000);
-
-    xScaled = xScaled;
-    yScaled = yScaled;
-    //long zScaled = map(az, -248.7, 248.56, -1000, 1000);
-
-    // re-scale to m/s^2
-    ax = xScaled *  g - baX;
-    ay = yScaled *  g - baY;
-
-    ax = map(ax, -(1000*g + baX), (1000*g + baX), -1000*g, 1000*g);
-    ay = map(ay, -(1000*g + baY), (1000*g + baY), -1000*g, 1000*g);
-
-    ax /= 1000;
-    ay /= 1000;
- // double zAccel = zScaled * .00981;
-
-    //ax = 1;//ay = -0.0;//dt = 0.01;
-    r = 0.0;
-}
-
-void getSensorFirst(double& ax, double& ay, double& r, double& dt){
-    short shortax = GY85.accelerometer_x(GY85.readFromAccelerometer());
-    short shortay = GY85.accelerometer_y(GY85.readFromAccelerometer());
-
-    double xScaled = (double) map(shortax, -254.27, 263.7, -1000, 1000); //we might want to do this again.
-    double yScaled = (double) map(shortay, -248.62, 270.05, -1000, 1000);
-    //long zScaled = map(az, -248.7, 248.56, -1000, 1000);
-    xScaled = xScaled;
-    yScaled = yScaled;
-    // re-scale to m/s^2
-    ax = xScaled * g;
-    ay = yScaled * g;
- // double zAccel = zScaled * .00981;
-
-    //ax = 1;//ay = -0.0;//dt = 0.01;
-    r = 0.0;
-}*/
-
-
-
-void Multistep2ptAdams(double y[], double timestep,
-                       double ydot[], double ydotold[]){
-    // Warning: this directly updates y
-    for(size_t i=0; i<5; i++){
-        y[i] = y[i] + timestep*(1.5*ydot[i]-0.5*ydotold[i]);
-    }
-}
-void ExplicitEuler(double y[], double timestep,
-                       double ydot[]){
-    // Warning: this directly updates y
-    for(size_t i=0; i<5; i++){
-        y[i] = y[i] + timestep*ydot[i];
-    }
-}
-
-void getSdot(double Sdot[], double State[], double ax, double ay, double r){
-    double x = State[0];
-    double y = State[1];
-    double u = State[2];
-    double v = State[3];
-    double psi = State[4];
-    // Calc
-    Sdot[0] = cos(psi)*u - sin(psi)*v;
-    Sdot[1] = sin(psi)*u + cos(psi)*v;
-    Sdot[2] = ax;
-    Sdot[3] = ay;
-    Sdot[4] = r;
 }
