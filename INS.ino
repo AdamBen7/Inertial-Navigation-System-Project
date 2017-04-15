@@ -9,6 +9,7 @@
 
 MPU9250 IMU;
 int16_t accel[3];
+int16_t gyro[3];
 
 Plotter p;
 Plotter q;
@@ -16,8 +17,9 @@ Plotter q;
     VectorXd TheState(6);
     MatrixXd Debugger(6,6);
 
-    double ax, ay, az, r, dt=0.004; //0.004 changed since didn't look right
+    double ax, ay, az, dt=0.004; //0.004 changed since didn't look right
     double baX, baY, baZ, ba2X, ba2Y, ba2Z; 
+    double bgX, bgY, bgZ, bg2X, bg2Y, bg2Z;
     double maxaX, minaX, maxaY, minaY;
     double ux, uy;
     double epsilon = 1.3;
@@ -28,7 +30,7 @@ Plotter q;
     double currtime;
     double g = 9.795;
 
-    int serialOption = 6;
+    int serialOption = 1;
 
 void setup(){
   Wire.begin();
@@ -52,11 +54,11 @@ void setup(){
 void loop(){
     //Init time
     time =0.0;
-    getSensor(ax,ay,r,dt);
+    getSensor(ax,ay,dt);
     currtime = millis()/1000.0; 
     Kalman Filter(dt, epsilon, ux, uy); //think of somthing better for object name
     while(true){
-      getSensor(ax,ay,r,dt);
+      getSensor(ax,ay,dt);
       prevtime = currtime;
       currtime = millis()/1000.0;
       dt = currtime - prevtime;
@@ -173,23 +175,32 @@ Serial.print('\n');
 
 
 //ax =1, ay = -1;
-void getSensor(double& ax, double& ay, double& r, double& dt){
+void getSensor(double& ax, double& ay, double& dt){
     IMU.readAccelData(&accel[0]);
+    IMU.readGyroData(&gyro[0]);
+    
     double xScaled = (double) accel[0] * IMU.AccelRes;
     double yScaled = (double) accel[1] * IMU.AccelRes;
     ax = xScaled * g - baX;
     ay = yScaled * g - baY;
-    r = 0.0;
-//    r = IMU.gyro_z( IMU.readGyro() );
+
+    gyrX = ((double)gyro[0] * IMU.GyroRes) - bgX;
+    gyrY = ((double)gyro[1] * IMU.GyroRes) - bgY;
+    gyrZ = ((double)gyro[2] * IMU.GyroRes) - bgZ;
 }
 
-void getSensorFirst(double& ax, double& ay, double& r, double& dt){
+void getSensorFirst(double& ax, double& ay, double& dt){
     IMU.readAccelData(&accel[0]);
+    IMU.readGyroData(&gyro[0]);
     double xScaled = (double) accel[0] * IMU.AccelRes;
     double yScaled = (double) accel[1] * IMU.AccelRes;
     ax = xScaled * g;
     ay = yScaled * g;
-    r = 0.0;
+
+    gyrX = (double)gyro[0] * IMU.GyroRes;
+    gyrY = (double)gyro[1] * IMU.GyroRes;
+    gyrZ = (double)gyro[2] * IMU.GyroRes;
+    
 }
 
 void getSensorBias(){
@@ -197,10 +208,18 @@ void getSensorBias(){
     baY = 0.0;
     ba2X = 0.0;
     ba2Y = 0.0;
+
+    bgX = 0.0;
+    bgY = 0.0;
+    bgZ = 0.0;
+    bg2X = 0.0;
+    bg2Y = 0.0;
+    bg2Z = 0.0;
+       
     int intRange = 1500;
     double range = (double) intRange;
   for (int i = 0; i < intRange; i++){
-    getSensorFirst(ax,ay,r,dt);
+    getSensorFirst(ax,ay, dt);
     if (serialOption == 6){
       q.Plot();
     } else{
@@ -209,19 +228,37 @@ void getSensorBias(){
     Serial.print(ax);
     Serial.print('\t');
     Serial.println(ay);
+    Serial.print('\t');
+    //Serial.println(az);
+    Serial.print('\t');
+    Serial.print(gyrX);
+    Serial.print('\t');
+    Serial.println(gyrY);
+    Serial.print('\t');
+    Serial.println(gyrZ);
+    Serial.print('\t');
+    
     }
     baX += ax;
     baY += ay;
 //    baZ += az; //normalizing new gravity will not result in 9.81. we'll correct that later
+    bgX += gyrX;
+    bgY += gyrY;
+    bgZ += gyrZ;
   }
   baX /= range;
   baY /= range;
-  baZ /= range;  
+  baZ /= range;
+
+  bgX /= range;
+  bgY /= range;
+  bgZ /= range;
+    
 
   for (int j = 0; j < 3; j++)
   {
     for (int i = 0; i < intRange; i++){
-      getSensor(ax,ay,r,dt);
+      getSensor(ax,ay,dt);
       if (serialOption == 6){
         q.Plot();
       } else{
@@ -233,13 +270,28 @@ void getSensorBias(){
       }
       ba2X += ax;
       ba2Y += ay;
+
+      bg2X += gyrX;
+      bg2Y += gyrY;
+      bg2Z += gyrZ;
     }
     ba2X /= range;
     ba2Y /= range;
+    bg2X /= range;
+    bg2Y /= range;
+    bg2Z /= range;
+  
     baX += ba2X;
     baY += ba2Y;
+    bgX += bg2X;
+    bgY += bg2Y;
+    bgZ += bg2Z;
+    
     ba2X = 0.0;
     ba2Y = 0.0;
+    bg2X = 0.0;
+    bg2Y = 0.0;
+    bg2Z = 0.0;
   }
 
   maxaX = 0.0;
@@ -249,7 +301,7 @@ void getSensorBias(){
 
   for (int i = 0; i < intRange; i++)
   {
-    getSensor(ax,ay,r,dt);
+    getSensor(ax,ay,dt);
     if(ax > maxaX)
     {
       maxaX = ax;

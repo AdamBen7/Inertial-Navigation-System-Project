@@ -230,7 +230,7 @@ enum MagScale
 class MPU9250
 {
 public:
-    uint8_t GyroScale = GFS_250DPS;
+    uint8_t GyroScale = GFS_2000DPS;
     uint8_t AccelScale = AFS_4G;
     uint8_t MagScale = MFS_16BITS;
 
