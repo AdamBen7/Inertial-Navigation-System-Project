@@ -1,0 +1,6 @@
+MPU9250	KEYWORD1
+init	KEYWORD2
+calibrate	KEYWORD2
+whoAmI	KEYWORD2
+readAccelData	KEYWORD2
+readGyroData	KEYWORD2

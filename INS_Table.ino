@@ -1,13 +1,15 @@
 //#include <iostream>
 #include <cmath>
 #include <Wire.h>
-#include "GY_85.h"
+#include "MPU9250.h"
 #include "Plotter.h"
 #include "Eigen30.h"
 #include <Eigen/LU>
 #include "Kalman.h"
 
-GY_85 GY85;
+MPU9250 IMU;
+int16_t accel[3];
+
 Plotter p;
 Plotter q;
 
@@ -18,7 +20,7 @@ Plotter q;
     double baX, baY, baZ, ba2X, ba2Y, ba2Z; 
     double maxaX, minaX, maxaY, minaY;
     double ux, uy;
-    double epsilon = 2.0;
+    double epsilon = 1.3;
     double gyrX, gyrY, gyrZ;
     double magX, magY, magZ;
     double time;
@@ -26,14 +28,15 @@ Plotter q;
     double currtime;
     double g = 9.795;
 
-    int serialOption = 7;
+    int serialOption = 6;
 
 void setup(){
   Wire.begin();
   delay(200);
   Serial.begin(9600);
   delay(500);
-  GY85.init();
+  //IMU.calibrate(); //we got our own way
+  IMU.init();
   q.AddTimeGraph("Raw Acceleration X", 15000, "ax", ax);
   q.AddTimeGraph("Raw Acceleration Y", 15000, "ay", ay);
   getSensorBias();
@@ -59,13 +62,17 @@ void loop(){
       dt = currtime - prevtime;
       // Advance time
       time = time + dt;      
+      
+      //Filter
       Filter.UpdateState(dt, ax, ay); 
       TheState = Filter.KFilter();
-      TheState = Filter.NoFilter(dt, ax, ay); //used when we want to compare... comment out above.
+      
+      //No Filter
+      //TheState = Filter.NoFilter(dt, ax, ay); //used when we want to compare... comment out above.
+      
       //Debugger = Filter.Debugger();
-      // Compute time derivative of states
-      // Time advancement of states        
-      // this is for debugging on your serial plotter (turn off if not needed)
+
+      // this is for debugging on your serial plotter
       // 0 - skip 
       // 1 - plot gyro values
       // 2 - plot accelerometer values
@@ -167,37 +174,21 @@ Serial.print('\n');
 
 //ax =1, ay = -1;
 void getSensor(double& ax, double& ay, double& r, double& dt){
-    short shortax = GY85.accelerometer_x(GY85.readFromAccelerometer());
-    short shortay = GY85.accelerometer_y(GY85.readFromAccelerometer());
- 
-    double xScaled = (double) map(shortax, -254.27, 263.7, -1000, 1000);
-    double yScaled = (double) map(shortay, -248.62, 270.05, -1000, 1000);
-
-    //long zScaled = map(az, -248.7, 248.56, -1000, 1000);
-
-    // re-scale to m/s^2
-    ax = (xScaled *  g/1000.0) - baX;
-    ay = (yScaled *  g/1000.0) - baY;
-    
- // double zAccel = zScaled * .00981;
-
-    //ax = 1;//ay = -0.0;//dt = 0.01;
-    r = GY85.gyro_z( GY85.readGyro() );
+    IMU.readAccelData(&accel[0]);
+    double xScaled = (double) accel[0] * IMU.AccelRes;
+    double yScaled = (double) accel[1] * IMU.AccelRes;
+    ax = xScaled * g - baX;
+    ay = yScaled * g - baY;
+    r = 0.0;
+//    r = IMU.gyro_z( IMU.readGyro() );
 }
 
 void getSensorFirst(double& ax, double& ay, double& r, double& dt){
-    short shortax = GY85.accelerometer_x(GY85.readFromAccelerometer());
-    short shortay = GY85.accelerometer_y(GY85.readFromAccelerometer());
-
-    double xScaled = (double) map(shortax, -254.27, 263.7, -1000, 1000);
-    double yScaled = (double) map(shortay, -248.62, 270.05, -1000, 1000);
-    //long zScaled = map(az, -248.7, 248.56, -1000, 1000);
-    // re-scale to m/s^2
-    ax = xScaled * g/1000.0;
-    ay = yScaled * g/1000.0;
- // double zAccel = zScaled * .00981;
-
-    //ax = 1;//ay = -0.0;//dt = 0.01;
+    IMU.readAccelData(&accel[0]);
+    double xScaled = (double) accel[0] * IMU.AccelRes;
+    double yScaled = (double) accel[1] * IMU.AccelRes;
+    ax = xScaled * g;
+    ay = yScaled * g;
     r = 0.0;
 }
 
@@ -206,7 +197,7 @@ void getSensorBias(){
     baY = 0.0;
     ba2X = 0.0;
     ba2Y = 0.0;
-    int intRange = 300;
+    int intRange = 1500;
     double range = (double) intRange;
   for (int i = 0; i < intRange; i++){
     getSensorFirst(ax,ay,r,dt);
@@ -283,11 +274,12 @@ void getSensorBias(){
   Serial.print('\t');
   Serial.print(maxaY);
   Serial.print('\t');
-    Serial.println(ay);
   Serial.println(minaY);
-
   ux = (maxaX > -minaX) ? (maxaX) : (-minaX);
   uy = (maxaY > -minaY) ? (maxaY) : (-minaY);
+
+  ux += 0.04; //accounting for uncertainty
+  uy += 0.03; //accounting for uncertainty
 
   Serial.print(ux);
   Serial.print('\t');
