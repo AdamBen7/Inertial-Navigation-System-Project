@@ -10,7 +10,7 @@ class Kalman
 {
   public:
 	Kalman();
-	Kalman(double dt, double epsilon, double ux, double uy, double ugz);
+	Kalman(double dt, double epsilon, double ux, double uy);
 	~Kalman();
 
 	VectorXd GetStateVecX() {return _StateVecX;}
@@ -26,21 +26,18 @@ class Kalman
 	MatrixXd GetKalmanG() {return _KalmanG;}
 	MatrixXd GetMatAnnoying() {return _MatAnnoying;}
 	MatrixXd GetMatAdam() { return _MatAdam;}
-	void UpdateState(double dt, double ax, double ay, double gyrZ);
-	VectorXd NoFilter(double dt, double ax, double ay, double gyrZ); // #noFilter!<3
+	void UpdateState(double dt, double ax, double ay);
+	VectorXd NoFilter(double dt, double ax, double ay); // #noFilter!<3
 
 	VectorXd KFilter(); //maybe pass in StateVecZ
 	MatrixXd Debugger();
 
-	void SetPsi(double StateVec2){_psi = StateVec2;}
-	
 
   private:
 	double _epsilon;
 	double _ux;
 	double _uy;
-	double _ugz;
-	double _psi;
+	
 /*	
 	VectorXd _StateVecX(6);
 	VectorXd _StateVecZ(6);

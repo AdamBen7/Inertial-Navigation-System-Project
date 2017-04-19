@@ -1,40 +1,44 @@
 #include "Kalman.h"
 
-Kalman::Kalman(double dt, double epsilon, double ux, double uy ){
+Kalman::Kalman(double dt, double epsilon, double ux, double uy, double ugz){
 
 	_epsilon = epsilon;
 	_ux = ux;
 	_uy = uy;
+	_ugz = ugz;//do not set to 0
+    _StateVecX.resize(8);
+	_StateVecZ.resize(8);
 
-    _StateVecX.resize(6);
-	_StateVecZ.resize(6);
+	_MatA.resize(8,8);
+	_MatB.resize(8,8);
+	_MatH.resize(8,8);
+	_MatI.resize(8,8);
+	_MatP.resize(8,8);
+	_MatQ.resize(8,8);
+	_MatR.resize(8,8);
+	_KalmanG.resize(8,8); //kalman gain
+	_MatAdam.resize(8,8);
 
-	_MatA.resize(6,6);
-	_MatB.resize(6,6);
-	_MatH.resize(6,6);
-	_MatI.resize(6,6);
-	_MatP.resize(6,6);
-	_MatQ.resize(6,6);
-	_MatR.resize(6,6);
-	_KalmanG.resize(6,6); //kalman gain
-	_MatAdam.resize(6,6);
-
+	_psi = 0;
 
 //Dynamics Matrix
-	_MatA << 1.0, 0.0, dt, 0.0, (dt*dt)/2, 0.0,
-		    0.0, 1.0, 0.0, dt, 0.0, (dt*dt)/2,
-    	    0.0, 0.0, 1.0, 0.0, dt, 0.0,
-	        0.0, 0.0, 0.0, 1.0, 0.0, dt,
-	        0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
-	        0.0, 0.0, 0.0, 0.0, 0.0, 1.0;
+	_MatA << 1.0, 0.0, 0.0, dt, 0.0, 0.0, cos(_psi)*(dt*dt)/2, -sin(_psi)*(dt*dt)/2,
+		    0.0, 1.0, 0.0, 0.0, dt, 0.0, sin(_psi)*(dt*dt)/2,  cos(_psi)*(dt*dt)/2,
+    	    0.0, 0.0, 1.0, 0.0, 0.0, dt, 0.0, 0.0,
+	        0.0, 0.0, 0.0, 1.0, 0.0, 0.0, cos(_psi)*dt, -sin(_psi)*dt,
+	        0.0, 0.0, 0.0, 0.0, 1.0, 0.0, sin(_psi)*dt, cos(_psi)*dt,
+	        0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+	        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+	        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0;
+			
 
 //For now, that's our apparatus
 	_MatB.setZero();
 
 //Set to zero with last to validating the acceleration values for state
 	_MatAdam.setZero();
-	_MatAdam(4,4) = 1.0;
-	_MatAdam(5,5) = 1.0;
+	_MatAdam(6,6) = 1.0;
+	_MatAdam(7,7) = 1.0;
 	/*_MatH.setZero();
 	_MatH(4,4) = 1.0;
 	_MatH(5,5) = 1.0;*/
@@ -44,16 +48,19 @@ Kalman::Kalman(double dt, double epsilon, double ux, double uy ){
 
 //process noise Matrix
 	_MatQ.setZero();
-	_MatQ(4,4) = epsilon;
-	_MatQ(5,5) = epsilon;
+	_MatQ(5,5) = epsilon; //different value for the gyro reading?
+	_MatQ(6,6) = epsilon;
+	_MatQ(7,7) = epsilon;
 
 	_MatR.setZero();
 	_MatR(0,0) = dt*dt*ux;
 	_MatR(1,1) = dt*dt*uy;
-	_MatR(2,2) = dt*ux;
-	_MatR(3,3) = dt*uy;
-	_MatR(4,4) = ux;
-	_MatR(5,5) = uy;
+	_MatR(2,2) = dt*_ugz;
+	_MatR(3,3) = dt*ux;
+	_MatR(4,4) = dt*uy;
+	_MatR(5,5) = _ugz;
+	_MatR(6,6) = ux;
+	_MatR(7,7) = uy;
 
 
 //At k=1
@@ -67,24 +74,32 @@ Kalman::Kalman(double dt, double epsilon, double ux, double uy ){
 	_MatAnnoying.setZero();
 }
 
-void Kalman::UpdateState(double dt, double ax, double ay){
-	
-//Incase we want to have varying dt's.
-	_MatA << 1.0, 0.0, dt, 0.0, (dt*dt)/2, 0.0,
-		    0.0, 1.0, 0.0, dt, 0.0, (dt*dt)/2,
-    	    0.0, 0.0, 1.0, 0.0, dt, 0.0,
-	        0.0, 0.0, 0.0, 1.0, 0.0, dt,
-	        0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
-	        0.0, 0.0, 0.0, 0.0, 0.0, 1.0;
+void Kalman::UpdateState(double dt, double ax, double ay, double gyrZ){
 
 	_MatR(0,0) = dt*dt*_ux;
 	_MatR(1,1) = dt*dt*_uy;
-	_MatR(2,2) = dt*_ux;
-	_MatR(3,3) = dt*_uy;
+	_MatR(2,2) = dt*_ugz;
+	_MatR(3,3) = dt*_ux;
+	_MatR(4,4) = dt*_uy;
+	_MatR(5,5) = _ugz;
+	_MatR(6,6) = _ux;
+	_MatR(7,7) = _uy;
 
     _StateVecZ = _StateVecX;
-	_StateVecZ(4) = ax;
-	_StateVecZ(5) = ay;
+	_StateVecZ(5) = gyrZ;
+	_StateVecZ(6) = ax;
+	_StateVecZ(7) = ay;
+
+	SetPsi(_StateVecX(2));
+//Incase we want to have varying dt's.
+	_MatA << 1.0, 0.0, 0.0, dt, 0.0, 0.0, cos(_psi)*(dt*dt)/2, -sin(_psi)*(dt*dt)/2,
+		    0.0, 1.0, 0.0, 0.0, dt, 0.0, sin(_psi)*(dt*dt)/2,  cos(_psi)*(dt*dt)/2,
+    	    0.0, 0.0, 1.0, 0.0, 0.0, dt, 0.0, 0.0,
+	        0.0, 0.0, 0.0, 1.0, 0.0, 0.0, cos(_psi)*dt, -sin(_psi)*dt,
+	        0.0, 0.0, 0.0, 0.0, 1.0, 0.0, sin(_psi)*dt, cos(_psi)*dt,
+	        0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+	        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+	        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0;
 
 	_StateVecZ *=_MatA;
 }
@@ -109,23 +124,27 @@ VectorXd Kalman::KFilter(){
 }
 
 MatrixXd Kalman::Debugger(){
-	return _MatH;
+	return _MatA;
 }
 
 //not working. todo later
-VectorXd Kalman::NoFilter(double dt, double ax, double ay){
-	_MatA << 1.0, 0.0, dt, 0.0, (dt*dt)/2, 0.0,
-		    0.0, 1.0, 0.0, dt, 0.0, (dt*dt)/2,
-    	    0.0, 0.0, 1.0, 0.0, dt, 0.0,
-	        0.0, 0.0, 0.0, 1.0, 0.0, dt,
-	        0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
-	        0.0, 0.0, 0.0, 0.0, 0.0, 1.0;
-	_StateVecZ(4) = ax;
-	_StateVecZ(5) = ay;
+VectorXd Kalman::NoFilter(double dt, double ax, double ay, double gyrZ){
+	_MatA << 1.0, 0.0, 0.0, dt, 0.0, 0.0, cos(_psi)*(dt*dt)/2, -sin(_psi)*(dt*dt)/2,
+		    0.0, 1.0, 0.0, 0.0, dt, 0.0, sin(_psi)*(dt*dt)/2,  cos(_psi)*(dt*dt)/2,
+    	    0.0, 0.0, 1.0, 0.0, 0.0, dt, 0.0, 0.0,
+	        0.0, 0.0, 0.0, 1.0, 0.0, 0.0, cos(_psi)*dt, -sin(_psi)*dt,
+	        0.0, 0.0, 0.0, 0.0, 1.0, 0.0, sin(_psi)*dt, cos(_psi)*dt,
+	        0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+	        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+	        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0;
+
+	_StateVecZ(5) = gyrZ;
+	_StateVecZ(6) = ax;
+	_StateVecZ(7) = ay;
+	SetPsi(_StateVecX(2));
 
 	_StateVecX = _MatA * _StateVecX + _MatB; //MatB*u
 	_StateVecX += (_StateVecZ - _MatAdam * _StateVecX); //update state vector
 	return _StateVecX;
 }
-
 
