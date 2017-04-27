@@ -10,7 +10,7 @@ class Kalman
 {
   public:
 	Kalman();
-	Kalman(double dt, double epsilon, double ux, double uy, double ugz);
+	Kalman(double dt, double accelEps, double gyrEps, double ux, double uy, double uz, double ugx, double ugy, double ugz);
 	~Kalman();
 
 	VectorXd GetStateVecX() {return _StateVecX;}
@@ -25,23 +25,30 @@ class Kalman
 	MatrixXd GetMatR() {return _MatR;}
 	MatrixXd GetKalmanG() {return _KalmanG;}
 	MatrixXd GetMatAnnoying() {return _MatAnnoying;}
-	MatrixXd GetMatAdam() { return _MatAdam;}
-	void UpdateState(double dt, double ax, double ay, double gyrZ);
+//	MatrixXd GetMatAdam() { return _MatAdam;}
+	void UpdateState(double dt, double ax, double ay, double az, double gyrX, double gyrY, double gyrZ);
 	VectorXd NoFilter(double dt, double ax, double ay, double gyrZ); // #noFilter!<3
 
 	VectorXd KFilter(); //maybe pass in StateVecZ
 	MatrixXd Debugger();
 
-	void SetPsi(double StateVec2){_psi = StateVec2;}
+//	void SetPsi(double StateVec2){_psi = StateVec2;}
 	
 
   private:
-	double _epsilon;
+	double _accelEps;
+	double _gyrEps;
 	double _ux;
 	double _uy;
+	double _uz;
+	double _ugx;
+	double _ugy;
 	double _ugz;
-	double _psi;
-/*	
+	double _Phi;
+	double _Theta;
+	double _Psi;
+
+/*
 	VectorXd _StateVecX(6);
 	VectorXd _StateVecZ(6);
 
@@ -66,5 +73,5 @@ class Kalman
 	MatrixXd _MatR;
 	MatrixXd _KalmanG; //kalman gain
 	MatrixXd _MatAnnoying;
-	MatrixXd _MatAdam;
+	//MatrixXd _MatAdam;
 };

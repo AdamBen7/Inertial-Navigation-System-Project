@@ -6,6 +6,8 @@
 using Eigen::VectorXd;
 using Eigen::MatrixXd;
 using Eigen::Matrix3f;
+using Eigen::DiagonalMatrix;
+
 //using Eigen::Matrix
 
 VectorXd StateVecX(6);
@@ -23,6 +25,22 @@ MatrixXd MatAnnoying(6,6);
 double dt = 5.0;
 double epsilon;
 double ux,uy;
+
+
+
+
+
+//======================Testing Area==========================
+DiagonalMatrix MatTest(3);
+//============================================================
+
+
+
+
+
+
+
+
 
 void setup() {
   Serial.begin(9600);
@@ -68,7 +86,6 @@ MatR(3,3) = dt*uy;
 MatR(4,4) = ux;
 MatR(5,5) = uy;
 
-
 //At k=1
 StateVecX.setZero();
 StateVecZ.setZero();
@@ -78,10 +95,23 @@ MatP = MatR;
 KalmanG.setZero();
 
 MatAnnoying.setZero();
+
+//======================================
+MatTest = DiagonalMatrix(5,3,2);
+//======================================
+
+
+
+
+
+
+
+
 }
 
 void loop() {
-
+  
+/*
 StateVecX = MatA * StateVecX + MatB; //MatB*u
 MatP = MatA * MatP * (MatA.transpose()) + MatQ;
 MatAnnoying = ((MatH.transpose()) * (MatH * MatP * (MatH.transpose()) + MatR));
@@ -97,7 +127,10 @@ MatP = (MatH - KalmanG * MatH) * MatP; //update uncertainty. MatH might be used 
 //  printArray(MatA);
 //  printArray(MatH);
 //  printArray(MatQ);
-//  printArray(MatR);
+//  printArray(MatR);*/
+
+  printArray(MatTest);
+
 //  while(true){};
 }
 

@@ -14,15 +14,17 @@ int16_t gyro[3];
 Plotter p;
 Plotter q;
 
-    VectorXd TheState(8);
-    MatrixXd Debugger(8,8);
+    VectorXd TheState(15);
+    int SampleSize = 200;
+    VectorXd aXSample(SampleSize), aYSample(SampleSize), aZSample(SampleSize), gyrXSample(SampleSize), gyrYSample(SampleSize), gyrZSample(SampleSize);
+    //MatrixXd Debugger(8,8);
 
     double ax, ay, az, dt=0.004;
     double baX = 0.0, baY = 0.0, baZ = 0.0, ba2X = 0.0, ba2Y = 0.0, ba2Z = 0.0; 
     double bgX = 0.0, bgY = 0.0, bgZ = 0.0, bg2X = 0.0, bg2Y = 0.0, bg2Z = 0.0;
-    double maxaX, minaX, maxaY, minaY, maxgZ, mingZ;
-    double ux, uy, ugz; //measurement uncertainty
-    double epsilon = 1.3;//1.3
+    double ux, uy, uz, ugx, ugy, ugz; //measurement uncertainty
+    double accelEps = 0.85;//1.3
+    double gyrEps = .5;
     double gyrX, gyrY, gyrZ;
     double magX, magY, magZ;
     double time;
@@ -34,21 +36,22 @@ Plotter q;
 
 void setup(){
   Wire.begin();
-  delay(200);
+  delay(100);
   Serial.begin(9600);
-  delay(500);
+  delay(200);
   //IMU.calibrate(); //we got our own way
   IMU.init();
   q.AddTimeGraph("Raw Acceleration X", 15000, "ax", ax);
   q.AddTimeGraph("Raw Acceleration Y", 15000, "ay", ay);
+  q.AddTimeGraph("Raw Acceleration Z", 15000, "ay", az);
   getSensorBias(); //comment out when you want raw data 
-  delay(500);
+  delay(200);
 //  p.AddXYGraph("Acceleration in X vs Custom Time", 1000000, "Time", time, "X-Acceleration");  //keep commented out
-  p.AddTimeGraph("Accel vs Time", 2000, "ax", TheState(6), "ay", TheState(7));
-  p.AddTimeGraph("Velocity vs Time", 2000, "u", TheState[3], "v", TheState[4] );
-  p.AddTimeGraph("Position vs Time", 2000, "x", TheState[0], "y", TheState[1] );
-  p.AddTimeGraph("Angular Velocity vs Time", 2000, "gz", TheState[5]);
-  p.AddTimeGraph("Angle  vs Time", 2000, "psi", TheState[2]);
+  p.AddTimeGraph("Accel vs Time", 2000, "ax", TheState(6), "ay", TheState(7), "az", TheState(8) );
+  p.AddTimeGraph("Velocity vs Time", 2000, "u", TheState(3), "v", TheState(4), "w", TheState(5) );
+  p.AddTimeGraph("Position vs Time", 2000, "x", TheState(0), "y", TheState(1), "z", TheState(2) );
+  p.AddTimeGraph("Angular Velocity vs Time", 2000, "PhiDot", TheState(12), "ThetaDot", TheState(13), "PsiDot", TheState[14]);
+  p.AddTimeGraph("Angle  vs Time", 2000, "phi", TheState(9), "theta", TheState(10), "psi", TheState(11) );
 //  p.AddTimeGraph("Anglular Velocity vs Time", 15000, "r", Sdot[4] );  
 //  p.AddTimeGraph("Angle vs Time", 15000, "psi", S[4] ); 
 }
@@ -57,8 +60,8 @@ void loop(){
     //Init time
     time =0.0;
     getSensor(ax,ay,dt);
-    currtime = millis()/1000.0; 
-    Kalman Filter(dt, epsilon, ux, uy, ugz); //think of somthing better for object name
+    currtime = millis()/1000.0;    
+    Kalman Filter(dt, accelEps, gyrEps, ux, uy, uz, ugx, ugy, ugz); //think of somthing better for object name
     while(true){
       getSensor(ax,ay,dt);
       prevtime = currtime;
@@ -68,7 +71,7 @@ void loop(){
       time = time + dt;      
       
       //Filter
-      Filter.UpdateState(dt, ax, ay, gyrZ); 
+      Filter.UpdateState(dt, ax, ay, az, gyrX, gyrY, gyrZ); 
       TheState = Filter.KFilter();
 
       //No Filter
@@ -241,8 +244,10 @@ void getSensorBias(){
     Serial.println("Determining Sensor Bias");
     baX = 0.0;
     baY = 0.0;
+    baZ = 0.0;
     ba2X = 0.0;
     ba2Y = 0.0;
+    ba2Z = 0.0;
 
     bgX = 0.0;
     bgY = 0.0;
@@ -275,7 +280,8 @@ void getSensorBias(){
     }
     baX += ax;
     baY += ay;
-//    baZ += az; //normalizing new gravity will not result in 9.81. we'll correct that later
+    baZ += az;
+ //normalizing new gravity will not result in 9.81. we'll correct that later
     bgX += gyrX;
     bgY += gyrY;
     bgZ += gyrZ;
@@ -312,6 +318,7 @@ void getSensorBias(){
       }
       ba2X += ax;
       ba2Y += ay;
+      ba2Z += az;
 
       bg2X += gyrX;
       bg2Y += gyrY;
@@ -319,86 +326,59 @@ void getSensorBias(){
     }
     ba2X /= range;
     ba2Y /= range;
+    ba2Z /= range;
     bg2X /= range;
     bg2Y /= range;
     bg2Z /= range;
   
     baX += ba2X;
     baY += ba2Y;
+    baZ += ba2Z;
     bgX += bg2X;
     bgY += bg2Y;
     bgZ += bg2Z;
     
     ba2X = 0.0;
     ba2Y = 0.0;
+    ba2Z = 0.0;
     bg2X = 0.0;
     bg2Y = 0.0;
     bg2Z = 0.0;
   }
-
-  maxaX = 0.0;
-  minaX = 0.0;
-  maxaY = 0.0;
-  minaY = 0.0;
-  mingZ = 0.0;
-  maxgZ = 0.0;
-
-  for (int i = 0; i < intRange; i++)
+  
+  Serial.println("Calculating Sample Variance...");
+  //Creates lists of values to calculate sample variance
+  for( int i = 0; i < (SampleSize); i++)
   {
     getSensor(ax,ay,dt);
-    if(ax > maxaX)
-    {
-      maxaX = ax;
-    }
-    if(ax < minaX)
-    {
-      minaX = ax;
-    }
-    if(ay > maxaY)
-    {
-      maxaY = ay;
-    }
-    if(ay < minaY)
-    {
-      minaY = ay;
-    }
-    if(gyrZ > maxgZ)
-    {
-      maxgZ = gyrZ;      
-    }
-    if(gyrZ < mingZ)
-    {
-      mingZ = gyrZ;
-    }
+    aXSample(i) = ax;
+    aYSample(i) = ay;
+    aZSample(i) = az;
+    gyrXSample(i) = gyrX;
+    gyrYSample(i) = gyrY;
+    gyrZSample(i) = gyrZ;
+ //   printPrettyArray(aXSample);
+    //Serial.println(i);
   }
-
-  Serial.print('\n');
-  Serial.println("MaxaX   MinaX  MaxaY    MinaY   MaxgZ   MingZ");
-  Serial.print(maxaX);
-  Serial.print('\t');
-  Serial.print(minaX);
-  Serial.print('\t');
-  Serial.print(maxaY);
-  Serial.print('\t');
-  Serial.print(minaY);
-  Serial.print('\t');
-  Serial.print(maxgZ);
-  Serial.print('\t');
-  Serial.println(mingZ);
   
-  ux = (maxaX > -minaX) ? (maxaX) : (-minaX);
-  uy = (maxaY > -minaY) ? (maxaY) : (-minaY);
-  ugz = (maxgZ > -mingZ) ? (maxgZ) : (-mingZ);
-  
-  ux += 0.02; //accounting for uncertainty 0.04
-  uy += 0.01; //accounting for uncertainty 0.03
-  ugz += 0.02;
+  ux = Variance(aXSample); //accounting for uncertainty 0.04
+  uy = Variance(aYSample); //accounting for uncertainty 0.03
+  uz = Variance(aZSample);
+  ugx = Variance(gyrXSample);
+  ugy = Variance(gyrYSample);
+  ugz = Variance(gyrZSample);
 
   Serial.println("Measurement Noise: ");
-  Serial.println("ux      uy      ugz     baX     baY     bgZ");
+  Serial.println("ux      uy      uz      ugx     ugy     ugz     baX     baY     baZ      bgX     bgY     bgZ");
   Serial.print(ux);
   Serial.print('\t');
   Serial.print(uy);
+  Serial.print('\t');
+  Serial.print(uz);
+  Serial.print('\t');
+  Serial.print(ugx);
+  Serial.print('\t');
+  Serial.print(ugy);
   Serial.print('\t');
   Serial.print(ugz);
   Serial.print('\t');
@@ -406,6 +386,33 @@ void getSensorBias(){
   Serial.print('\t');
   Serial.print(baY);
   Serial.print('\t');
+  Serial.print(baZ);
+  Serial.print('\t');
+  Serial.print(bgX);
+  Serial.print('\t');
+  Serial.print(bgY);
+  Serial.print('\t');
   Serial.println(bgZ);
   Serial.print('\n');
 }
+
+double Variance(VectorXd Vec) 
+{
+  double sum, squaredsum;
+  sum = 0.0;
+  squaredsum = 0.0;
+  for (int i=0; i < Vec.size(); i++)
+  {
+    sum += Vec(i);
+    squaredsum += (Vec(i)*Vec(i));
+  }
+  double average = sum/Vec.size();
+  double ans = squaredsum/Vec.size() - (average*average);
+/*  Serial.print(sum);
+  Serial.print('\t');
+  Serial.print(average);
+  Serial.print('\t');
+  Serial.println(ans,3);*/
+  return squaredsum/Vec.size() - (average*average);
+}
+
