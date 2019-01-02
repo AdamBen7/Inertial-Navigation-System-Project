@@ -1,0 +1,17 @@
+{
+  "name": "MPU-9250",
+  "keywords": "gyroscope, accelerometer, compass, sensor, i2c",
+  "description": "The MPU-9250 is a System in Package (SiP) that combines two chips: the MPU-6500, which contains a 3-axis gyroscope, a 3-axis accelerometer, and an onboard Digital Motion Processor™ (DMP™) capable of processing complex MotionFusion algorithms; and the AK8963, the market leading 3-axis digital compass.",
+  "include":
+  [
+      "*.h",
+      "*.cpp"
+  ],
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/FryDay/MPU-9250.git"
+  },
+  "frameworks": "arduino",
+  "platforms": "atmelavr"
+}
